@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sight Words — K-Phonics Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red:#FF4B5C; --blue:#2D7DD2; --green:#06D6A0;
+  --yellow:#FFD166; --purple:#9B5DE5;
+  --bg:#FFF8F0; --card:#FFFFFF; --text:#1A1A2E; --muted:#9A9AB0;
+  --radius:20px; --shadow:0 8px 30px rgba(0,0,0,0.10);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg); min-height:100vh;
+  display:flex; flex-direction:column; align-items:center;
+  padding:0 16px 60px;
+}
+
+/* TOP BAR */
+.topbar{
+  width:100%; max-width:560px;
+  display:flex; align-items:center; gap:12px;
+  padding:16px 0 20px;
+}
+.back-btn{
+  width:40px;height:40px;border-radius:12px;
+  background:white;border:none;cursor:pointer;
+  font-size:1.1rem;box-shadow:var(--shadow);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.page-title{
+  font-family:'Baloo 2',cursive;font-size:1.2rem;
+  font-weight:800;color:var(--text);flex:1;
+}
+.mode-toggle{
+  display:flex;gap:6px;
+}
+.mode-btn{
+  padding:6px 14px;border-radius:50px;border:2px solid #e5e7eb;
+  background:white;font-family:'Nunito',sans-serif;
+  font-size:0.78rem;font-weight:800;color:var(--muted);
+  cursor:pointer;transition:all 0.2s;
+}
+.mode-btn.active{
+  background:var(--purple);border-color:var(--purple);
+  color:white;
+}
+
+/* GROUP TABS */
+.group-tabs{
+  display:flex;gap:8px;flex-wrap:wrap;
+  justify-content:center;margin-bottom:20px;
+  width:100%;max-width:560px;
+}
+.group-tab{
+  padding:8px 18px;border-radius:50px;border:none;
+  cursor:pointer;font-family:'Nunito',sans-serif;
+  font-weight:800;font-size:0.82rem;
+  background:white;color:var(--muted);
+  box-shadow:0 2px 8px rgba(0,0,0,0.07);
+  transition:all 0.2s;
+}
+.group-tab.active{color:white;transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(0,0,0,0.15);}
+.group-tab[data-g="0"].active{background:var(--blue);}
+.group-tab[data-g="1"].active{background:var(--red);}
+.group-tab[data-g="2"].active{background:var(--green);}
+.group-tab[data-g="3"].active{background:var(--yellow);color:var(--text);}
+.group-tab[data-g="4"].active{background:var(--purple);}
+
+/* ── FLASHCARD MODE ── */
+.flash-wrap{
+  width:100%;max-width:400px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:16px;
+}
+.flash-card{
+  width:100%;background:white;
+  border-radius:28px;box-shadow:0 16px 50px rgba(0,0,0,0.12);
+  padding:48px 32px;text-align:center;
+  cursor:pointer;position:relative;overflow:hidden;
+  transition:transform 0.2s;
+  min-height:240px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px;
+}
+.flash-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:6px;
+  border-radius:28px 28px 0 0;
+}
+.flash-card.g0::before{background:var(--blue);}
+.flash-card.g1::before{background:var(--red);}
+.flash-card.g2::before{background:var(--green);}
+.flash-card.g3::before{background:var(--yellow);}
+.flash-card.g4::before{background:var(--purple);}
+.flash-card:active{transform:scale(0.97);}
+.flash-card.flipped{animation:flip 0.15s ease;}
+@keyframes flip{0%{opacity:1;}50%{opacity:0;transform:scale(0.95);}100%{opacity:1;}}
+
+.flash-word{
+  font-family:'Baloo 2',cursive;font-size:3.5rem;
+  font-weight:900;color:var(--text);line-height:1;
+}
+.flash-meaning{
+  font-size:1rem;font-weight:700;color:var(--muted);
+  display:none;
+}
+.flash-example{
+  font-size:0.9rem;font-weight:600;color:var(--text);
+  line-height:1.5;background:#f8f9fa;
+  border-radius:12px;padding:10px 16px;
+  display:none;max-width:280px;
+}
+.flash-example em{
+  font-style:normal;font-weight:900;color:var(--purple);
+}
+.flash-card.revealed .flash-meaning{display:block;}
+.flash-card.revealed .flash-example{display:block;}
+.flash-example{cursor:pointer;position:relative;}
+.flash-example::after{
+  content:'🔊';position:absolute;top:6px;right:10px;
+  font-size:0.85rem;opacity:0.5;
+}
+.flash-example:hover::after{opacity:1;}
+.flash-example:hover{background:#eef2ff;}
+
+.flash-hint{
+  font-size:0.78rem;font-weight:700;color:var(--muted);
+  text-align:center;
+}
+.flash-nav{
+  display:flex;gap:12px;align-items:center;
+}
+.nav-btn{
+  width:48px;height:48px;border-radius:14px;
+  border:2px solid #e5e7eb;background:white;
+  font-size:1.2rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;box-shadow:var(--shadow);
+}
+.nav-btn:hover{border-color:var(--purple);color:var(--purple);}
+.flash-counter{
+  font-family:'Baloo 2',cursive;font-size:1rem;
+  font-weight:800;color:var(--muted);min-width:60px;text-align:center;
+}
+.speak-btn{
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+  color:white;border:none;border-radius:14px;
+  padding:12px 24px;font-family:'Nunito',sans-serif;
+  font-size:0.9rem;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  transition:all 0.2s;box-shadow:0 6px 20px rgba(155,93,229,0.3);
+}
+.speak-btn:hover{transform:translateY(-2px);}
+
+/* ── QUIZ MODE ── */
+.sw-quiz-wrap{
+  width:100%;max-width:520px;
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+}
+.sw-q-card{
+  width:100%;background:white;border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:28px 24px;
+  animation:slideUp 0.3s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.sw-q-badge{
+  display:inline-block;font-size:0.7rem;font-weight:800;
+  letter-spacing:1px;text-transform:uppercase;
+  padding:4px 12px;border-radius:50px;
+  background:rgba(155,93,229,0.1);color:var(--purple);
+  margin-bottom:12px;
+}
+.sw-q-text{
+  font-family:'Baloo 2',cursive;font-size:1.3rem;
+  font-weight:800;color:var(--text);line-height:1.4;
+  margin-bottom:6px;
+}
+.sw-q-blank{
+  display:inline-block;
+  min-width:80px;height:36px;
+  background:#f3f4f6;border-radius:8px;
+  border-bottom:3px solid var(--purple);
+  vertical-align:middle;
+}
+.sw-q-hint{
+  font-size:0.82rem;font-weight:600;color:var(--muted);
+  margin-bottom:20px;
+}
+.sw-options{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.sw-opt{
+  background:white;border:2px solid #e5e7eb;
+  border-radius:14px;padding:16px 12px;
+  cursor:pointer;text-align:center;
+  font-family:'Baloo 2',cursive;font-size:1.2rem;
+  font-weight:800;color:var(--text);
+  transition:all 0.18s;
+  -webkit-tap-highlight-color:transparent;
+}
+.sw-opt:hover{border-color:var(--purple);transform:translateY(-2px);}
+.sw-opt.correct{border-color:var(--green);background:rgba(6,214,160,0.08);color:var(--green);}
+.sw-opt.wrong{border-color:var(--red);background:rgba(255,75,92,0.08);color:var(--red);}
+
+/* FEEDBACK */
+.sw-feedback{
+  width:100%;background:white;border-radius:16px;
+  padding:14px 20px;display:none;
+  align-items:center;gap:12px;
+  box-shadow:var(--shadow);animation:slideUp 0.3s ease;
+}
+.sw-feedback.show{display:flex;}
+.sw-feedback.ok{border-left:5px solid var(--green);}
+.sw-feedback.ng{border-left:5px solid var(--red);}
+.sw-fb-text{flex:1;font-size:0.88rem;font-weight:700;color:var(--text);}
+.sw-fb-text span{display:block;font-size:0.78rem;color:var(--muted);margin-top:2px;font-weight:600;}
+.sw-next{
+  background:var(--purple);color:white;border:none;
+  border-radius:10px;padding:10px 16px;
+  font-family:'Nunito',sans-serif;font-size:0.82rem;
+  font-weight:800;cursor:pointer;white-space:nowrap;
+}
+
+/* PROGRESS BAR */
+.sw-progress{width:100%;max-width:520px;margin-bottom:16px;}
+.sw-prog-bg{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;}
+.sw-prog-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));
+  border-radius:4px;transition:width 0.5s ease;}
+.sw-prog-info{display:flex;justify-content:space-between;
+  font-size:0.75rem;font-weight:700;color:var(--muted);margin-top:5px;}
+
+/* RESULT */
+.sw-result{
+  width:100%;max-width:520px;background:white;
+  border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:40px 24px;text-align:center;
+  display:none;animation:slideUp 0.4s ease;
+}
+.sw-result.show{display:block;}
+.sw-result-score{
+  font-family:'Baloo 2',cursive;font-size:3rem;font-weight:900;
+  margin:16px 0;
+}
+.sw-result-btns{display:flex;gap:12px;justify-content:center;margin-top:20px;}
+.sw-retry{background:var(--purple);color:white;border:none;
+  border-radius:14px;padding:14px 28px;
+  font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:800;cursor:pointer;}
+.sw-home{background:white;color:var(--text);border:2px solid #e5e7eb;
+  border-radius:14px;padding:14px 28px;
+  font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:800;cursor:pointer;}
+
+/* WORD GRID (review) */
+.word-grid-wrap{width:100%;max-width:560px;}
+.word-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+  gap:10px;
+}
+.word-chip{
+  background:white;border-radius:14px;padding:14px 8px;
+  text-align:center;cursor:pointer;
+  box-shadow:0 4px 15px rgba(0,0,0,0.07);
+  transition:all 0.2s;position:relative;
+  border:2px solid transparent;
+}
+.word-chip:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,0.1);}
+.word-chip.mastered{border-color:var(--green);}
+.word-chip-word{
+  font-family:'Baloo 2',cursive;font-size:1.1rem;
+  font-weight:800;color:var(--text);display:block;
+}
+.word-chip-kr{
+  font-size:0.72rem;font-weight:700;color:var(--muted);
+  display:block;margin-top:3px;
+}
+.word-chip .check{
+  position:absolute;top:6px;right:6px;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--green);color:white;
+  font-size:0.6rem;display:none;
+  align-items:center;justify-content:center;
+}
+.word-chip.mastered .check{display:flex;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <button class="back-btn" onclick="location.href='index.html'">←</button>
+  <div class="page-title">⭐ Sight Words</div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" onclick="setMode('flash',this)">카드</button>
+    <button class="mode-btn" onclick="setMode('quiz',this)">퀴즈</button>
+    <button class="mode-btn" onclick="setMode('grid',this)">목록</button>
+  </div>
+</div>
+
+<!-- GROUP TABS -->
+<div class="group-tabs" id="groupTabs"></div>
+
+<!-- ── FLASH MODE ── -->
+<div class="flash-wrap" id="flashMode">
+  <div class="flash-card" id="flashCard" onclick="revealCard()">
+    <div class="flash-word" id="flashWord">-</div>
+    <div class="flash-meaning" id="flashMeaning">-</div>
+    <div class="flash-example" id="flashExample">-</div>
+  </div>
+  <div class="flash-hint" id="flashHint">탭하면 뜻과 예문이 나와요 👆</div>
+  <button class="speak-btn" onclick="speakCurrent()">
+    🔊 <span>소리 듣기</span>
+  </button>
+  <div class="flash-nav">
+    <button class="nav-btn" onclick="prevCard()">←</button>
+    <div class="flash-counter" id="flashCounter">1 / 10</div>
+    <button class="nav-btn" onclick="nextCard()">→</button>
+  </div>
+</div>
+
+<!-- ── QUIZ MODE ── -->
+<div class="sw-quiz-wrap" id="quizMode" style="display:none">
+  <div class="sw-progress">
+    <div class="sw-prog-bg"><div class="sw-prog-fill" id="swProgFill" style="width:0%"></div></div>
+    <div class="sw-prog-info">
+      <span id="swQNum">문제 1 / 10</span>
+      <span id="swScore">0점</span>
+    </div>
+  </div>
+  <div class="sw-q-card" id="swQCard">
+    <div class="sw-q-badge">✏️ 빈칸 채우기</div>
+    <div class="sw-q-text" id="swQText">-</div>
+    <div class="sw-q-hint" id="swQHint">-</div>
+    <div class="sw-options" id="swOptions"></div>
+  </div>
+  <div class="sw-feedback" id="swFeedback">
+    <div style="font-size:1.5rem" id="swFbIcon">🎉</div>
+    <div class="sw-fb-text">
+      <div id="swFbTitle">정답!</div>
+      <span id="swFbMsg"></span>
+    </div>
+    <button class="sw-next" onclick="swNext()">다음 →</button>
+  </div>
+  <div class="sw-result" id="swResult">
+    <div style="font-size:3rem" id="swResultEmoji">🏆</div>
+    <div style="font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:900;color:var(--text)">Quiz 완료!</div>
+    <div class="sw-result-score" id="swResultScore"></div>
+    <div style="font-size:0.88rem;color:var(--muted);font-weight:600" id="swResultMsg"></div>
+    <div class="sw-result-btns">
+      <button class="sw-retry" onclick="startSWQuiz()">다시 풀기 🔄</button>
+      <button class="sw-home" onclick="location.href='index.html'">허브로 🏠</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── GRID MODE ── -->
+<div class="word-grid-wrap" id="gridMode" style="display:none">
+  <div class="word-grid" id="wordGrid"></div>
+</div>
+
+<script>
+// ════════════════════════════════
+// DATA — 50 사이트워드 5그룹
+// ════════════════════════════════
+const GROUPS = [
+  // 🔴 = True Sight Word (규칙 외, 암기 필수)
+  // 🟢 = 규칙 선행형 (해당 파닉스 단계 이후 규칙으로 재해석 가능)
+  {
+    name:'⭐ 핵심 암기어', color:'blue',
+    words:[
+      {w:'I',    kr:'나',        ex:'<em>I</em> am happy.',          hint:'🔴 대문자 단독 — 외워요'},
+      {w:'a',    kr:'하나의',    ex:'I have <em>a</em> cat.',         hint:'🔴 /ə/ 소리 — 외워요'},
+      {w:'the',  kr:'그',        ex:'<em>The</em> cat is cute.',      hint:'🔴 /ðə/ 소리 — 외워요'},
+      {w:'to',   kr:'~에게/로',  ex:'Come <em>to</em> me.',           hint:'🔴 o→/uː/ 예외 — 외워요'},
+      {w:'you',  kr:'너/당신',   ex:'<em>You</em> are kind.',         hint:'🔴 ou→/uː/ 예외 — 외워요'},
+      {w:'do',   kr:'하다',      ex:'<em>Do</em> you like cats?',     hint:'🔴 o→/uː/ 예외 — 외워요'},
+      {w:'said', kr:'말했다',    ex:'She <em>said</em> hello.',       hint:'🔴 ai→/ɛ/ 예외 — 외워요'},
+      {w:'one',  kr:'하나',      ex:'I have <em>one</em> dog.',       hint:'🔴 /wʌn/ 완전 불규칙'},
+      {w:'come', kr:'오다',      ex:'<em>Come</em> here, please.',    hint:'🔴 Silent e인데 /ʌ/ 예외'},
+      {w:'what', kr:'무엇',      ex:'<em>What</em> is this?',         hint:'🔴 wh+a→/wʌ/ 예외'},
+    ]
+  },
+  {
+    name:'🙋 대명사·be동사', color:'red',
+    words:[
+      {w:'am',   kr:'~이다(I)',  ex:'I <em>am</em> a student.',       hint:'🟢 Stage2 VC /æm/ — I+am'},
+      {w:'is',   kr:'~이다',     ex:'She <em>is</em> my friend.',     hint:'🟢 Stage2 VC /ɪz/ — He/She/It+is'},
+      {w:'are',  kr:'~이다',     ex:'You <em>are</em> kind.',         hint:'🟢 Stage4 ar+묵음e — You/We/They+are'},
+      {w:'he',   kr:'그',        ex:'<em>He</em> is my dad.',         hint:'🟢 Stage4 개음절 /hiː/ — 남자'},
+      {w:'she',  kr:'그녀',      ex:'<em>She</em> is tall.',          hint:'🟢 Stage4 개음절 /ʃiː/ — 여자'},
+      {w:'it',   kr:'그것',      ex:'<em>It</em> is a cat.',          hint:'🟢 Stage2 VC /ɪt/ — 사물·동물'},
+      {w:'we',   kr:'우리',      ex:'<em>We</em> are friends.',       hint:'🟢 Stage4 개음절 /wiː/ — 나+상대'},
+      {w:'they', kr:'그들',      ex:'<em>They</em> are happy.',       hint:'🟢 Stage4 ey팀 /eɪ/ — 여러 명'},
+      {w:'me',   kr:'나를',      ex:'Look at <em>me</em>!',           hint:'🟢 Stage4 개음절 /miː/'},
+      {w:'my',   kr:'나의',      ex:'<em>My</em> name is Sora.',      hint:'🟢 Stage4 개음절 y→/aɪ/'},
+    ]
+  },
+  {
+    name:'👀 지시·의문어', color:'green',
+    words:[
+      {w:'this',  kr:'이것',     ex:'What is <em>this</em>?',         hint:'🟢 Stage3 th+CVC — 가까운 것'},
+      {w:'that',  kr:'저것',     ex:'<em>That</em> is big.',          hint:'🟢 Stage3 th+CVC — 먼 것'},
+      {w:'here',  kr:'여기',     ex:'Come <em>here</em>, please.',    hint:'🟢 Stage4 R통제 ere — 이 장소'},
+      {w:'there', kr:'저기',     ex:'Look <em>there</em>!',           hint:'🟢 Stage4 R통제 ere — 저 장소'},
+      {w:'where', kr:'어디',     ex:'<em>Where</em> is the cat?',     hint:'🟢 Stage4 R통제 ere+wh'},
+      {w:'how',   kr:'어떻게',   ex:'<em>How</em> are you?',          hint:'🟢 Stage4 ow팀 /aʊ/'},
+      {w:'in',    kr:'~안에',    ex:'It is <em>in</em> the box.',     hint:'🟢 Stage2 VC /ɪn/'},
+      {w:'on',    kr:'~위에',    ex:'The cat is <em>on</em> the mat.',hint:'🟢 Stage2 VC /ɑn/'},
+      {w:'at',    kr:'~에(서)',   ex:'I am <em>at</em> school.',       hint:'🟢 Stage2 VC /æt/'},
+      {w:'up',    kr:'위로',     ex:'Stand <em>up</em>, please!',     hint:'🟢 Stage2 VC /ʌp/'},
+    ]
+  },
+  {
+    name:'❤️ 동사·형용사', color:'yellow',
+    words:[
+      {w:'have',  kr:'가지다',   ex:'I <em>have</em> a pencil.',      hint:'🔴 Silent e인데 /æ/ 예외'},
+      {w:'can',   kr:'할 수 있다',ex:'I <em>can</em> swim.',          hint:'🟢 Stage2 CVC /kæn/'},
+      {w:'like',  kr:'좋아하다', ex:'I <em>like</em> apples.',        hint:'🟢 Stage3 Silent e /laɪk/'},
+      {w:'see',   kr:'보다',     ex:'I <em>see</em> a bird.',         hint:'🟢 Stage4 ee팀 /iː/'},
+      {w:'look',  kr:'보다',     ex:'<em>Look</em> at me!',           hint:'🟢 Stage4 oo팀 /ʊ/'},
+      {w:'go',    kr:'가다',     ex:'Let\'s <em>go</em>!',            hint:'🟢 Stage4 개음절 /goʊ/'},
+      {w:'make',  kr:'만들다',   ex:'Let\'s <em>make</em> a card.',   hint:'🟢 Stage3 Silent e /meɪk/'},
+      {w:'two',   kr:'둘',       ex:'I see <em>two</em> birds.',      hint:'🔴 w묵음 o→/uː/ 예외'},
+      {w:'big',   kr:'큰',       ex:'It is <em>big</em>!',            hint:'🟢 Stage2 CVC /bɪg/'},
+      {w:'good',  kr:'좋은',     ex:'<em>Good</em> morning!',         hint:'🟢 Stage4 oo팀 /ʊ/'},
+    ]
+  },
+  {
+    name:'🔗 기능어·확장', color:'purple',
+    words:[
+      {w:'and',   kr:'그리고',   ex:'I like cats <em>and</em> dogs.', hint:'🟢 Stage2 CVCC /ænd/ — 연결'},
+      {w:'not',   kr:'~아니다',  ex:'I am <em>not</em> sad.',         hint:'🟢 Stage2 CVC /nɑt/ — 부정'},
+      {w:'for',   kr:'~을 위해', ex:'This is <em>for</em> you.',      hint:'🟢 Stage4 R통제 or — 목적'},
+      {w:'from',  kr:'~에서',    ex:'I am <em>from</em> Korea.',      hint:'🟢 Stage2 CCVC /frɑm/'},
+      {w:'with',  kr:'~와 함께', ex:'Play <em>with</em> me!',         hint:'🟢 Stage2 CVCC /wɪð/'},
+      {w:'play',  kr:'놀다',     ex:'Let\'s <em>play</em>!',          hint:'🟢 Stage4 ay팀 /eɪ/'},
+      {w:'run',   kr:'달리다',   ex:'<em>Run</em> fast!',             hint:'🟢 Stage2 CVC /rʌn/'},
+      {w:'help',  kr:'돕다',     ex:'<em>Help</em> me, please!',      hint:'🟢 Stage2 CVCC /hɛlp/'},
+      {w:'yes',   kr:'네',       ex:'<em>Yes</em>, I can!',           hint:'🟢 Stage4 개음절+y /jɛs/'},
+      {w:'no',    kr:'아니오',   ex:'<em>No</em>, I cannot.',         hint:'🟢 Stage4 개음절 /noʊ/'},
+    ]
+  }
+];
+
+// ════════════════════════════════
+// STATE
+// ════════════════════════════════
+let mode = 'flash';
+let group = 0;
+let cardIdx = 0;
+let revealed = false;
+let swQuestions = [];
+let swCurrent = 0;
+let swScore = 0;
+let swAnswered = false;
+const mastered = JSON.parse(localStorage.getItem('sw_mastered')||'{}');
+
+const synth = window.speechSynthesis;
+let voiceList = [];
+
+function loadVoices(){
+  voiceList = synth.getVoices();
+}
+loadVoices();
+if(speechSynthesis.onvoiceschanged !== undefined){
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function getUSVoice(){
+  // 1순위: en-US 여성 자연음 (Samantha, Alex, Google US English)
+  const preferred = ['Samantha','Google US English','Alex','Karen','Moira'];
+  for(const name of preferred){
+    const v = voiceList.find(x => x.name.includes(name) && x.lang.startsWith('en'));
+    if(v) return v;
+  }
+  // 2순위: en-US 아무거나
+  const usVoice = voiceList.find(x => x.lang === 'en-US');
+  if(usVoice) return usVoice;
+  // 3순위: en- 계열
+  const enVoice = voiceList.find(x => x.lang.startsWith('en'));
+  if(enVoice) return enVoice;
+  return null;
+}
+
+function speak(text, rate=0.82){
+  // voices가 아직 안 로드됐으면 잠깐 기다렸다 재시도
+  if(voiceList.length === 0){
+    voiceList = synth.getVoices();
+    if(voiceList.length === 0){
+      setTimeout(()=>speak(text, rate), 300);
+      return;
+    }
+  }
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  u.rate = rate;
+  u.pitch = 1.0;
+  const v = getUSVoice();
+  if(v) u.voice = v;
+  synth.speak(u);
+}
+
+// 예문에서 HTML 태그 제거 후 읽기
+function speakExample(html){
+  const plain = html.replace(/<[^>]+>/g, '');
+  speak(plain, 0.75);
+}
+
+// ════════════════════════════════
+// INIT
+// ════════════════════════════════
+function init(){
+  buildTabs();
+  setGroup(0);
+}
+
+function buildTabs(){
+  const c=document.getElementById('groupTabs');
+  c.innerHTML='';
+  GROUPS.forEach((g,i)=>{
+    const btn=document.createElement('button');
+    btn.className='group-tab'+(i===group?' active':'');
+    btn.dataset.g=i;
+    btn.textContent=g.name;
+    btn.onclick=()=>setGroup(i);
+    c.appendChild(btn);
+  });
+}
+
+function setGroup(i){
+  group=i;
+  cardIdx=0;revealed=false;
+  document.querySelectorAll('.group-tab').forEach(t=>
+    t.classList.toggle('active',parseInt(t.dataset.g)===i));
+  if(mode==='flash') renderFlash();
+  else if(mode==='quiz') startSWQuiz();
+  else renderGrid();
+}
+
+function setMode(m,btn){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('flashMode').style.display = m==='flash'?'flex':'none';
+  document.getElementById('quizMode').style.display  = m==='quiz' ?'flex':'none';
+  document.getElementById('gridMode').style.display  = m==='grid' ?'block':'none';
+  if(m==='flash') renderFlash();
+  else if(m==='quiz') startSWQuiz();
+  else renderGrid();
+}
+
+// ════════════════════════════════
+// FLASH MODE
+// ════════════════════════════════
+function renderFlash(){
+  const words=GROUPS[group].words;
+  const w=words[cardIdx];
+  const card=document.getElementById('flashCard');
+  card.className='flash-card g'+group;
+  card.classList.remove('revealed','flipped');
+  revealed=false;
+
+  document.getElementById('flashWord').textContent=w.w;
+  document.getElementById('flashMeaning').textContent=w.kr;
+  document.getElementById('flashExample').innerHTML=w.ex;
+  document.getElementById('flashCounter').textContent=`${cardIdx+1} / ${words.length}`;
+  document.getElementById('flashHint').textContent='탭하면 뜻과 예문이 나와요 👆';
+
+  // 예문 클릭 → 예문 읽기
+  const exEl = document.getElementById('flashExample');
+  exEl.onclick = (e) => {
+    e.stopPropagation();
+    speakExample(w.ex);
+  };
+}
+
+function revealCard(){
+  if(revealed) return;
+  revealed=true;
+  const card=document.getElementById('flashCard');
+  card.classList.add('revealed','flipped');
+  document.getElementById('flashHint').textContent='예문을 탭하면 소리가 나와요 🔊';
+  // mark mastered
+  const key=`${group}_${cardIdx}`;
+  mastered[key]=true;
+  localStorage.setItem('sw_mastered',JSON.stringify(mastered));
+}
+
+function prevCard(){
+  const words=GROUPS[group].words;
+  cardIdx=(cardIdx-1+words.length)%words.length;
+  renderFlash();
+}
+function nextCard(){
+  const words=GROUPS[group].words;
+  cardIdx=(cardIdx+1)%words.length;
+  renderFlash();
+}
+function speakCurrent(){
+  speak(GROUPS[group].words[cardIdx].w);
+}
+
+// ════════════════════════════════
+// QUIZ MODE
+// ════════════════════════════════
+function startSWQuiz(){
+  document.getElementById('swResult').classList.remove('show');
+  document.getElementById('swQCard').style.display='block';
+  document.getElementById('swOptions').style.display='grid';
+  document.getElementById('swFeedback').classList.remove('show','ok','ng');
+
+  const words=GROUPS[group].words;
+  swQuestions=[...words].sort(()=>Math.random()-0.5);
+  swCurrent=0;swScore=0;swAnswered=false;
+  renderSWQ();
+}
+
+function renderSWQ(){
+  swAnswered=false;
+  const q=swQuestions[swCurrent];
+  const total=swQuestions.length;
+
+  document.getElementById('swProgFill').style.width=(swCurrent/total*100)+'%';
+  document.getElementById('swQNum').textContent=`문제 ${swCurrent+1} / ${total}`;
+  document.getElementById('swScore').textContent=`${swScore}점`;
+
+  document.getElementById('swFeedback').classList.remove('show','ok','ng');
+
+  // build sentence with blank
+  const sentence = q.ex.replace(/<em>(.*?)<\/em>/g,'<span class="sw-q-blank"></span>');
+  document.getElementById('swQText').innerHTML=sentence;
+  document.getElementById('swQHint').textContent=`힌트: ${q.hint}`;
+
+  // options: correct + 3 random others from group
+  const all=GROUPS[group].words;
+  const others=all.filter(x=>x.w!==q.w).sort(()=>Math.random()-0.5).slice(0,3);
+  const opts=[q,...others].sort(()=>Math.random()-0.5);
+
+  const grid=document.getElementById('swOptions');
+  grid.innerHTML='';
+  opts.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.className='sw-opt';
+    btn.textContent=opt.w;
+    btn.onclick=()=>checkSW(opt.w===q.w,btn,q);
+    grid.appendChild(btn);
+  });
+
+  // re-animate
+  const card=document.getElementById('swQCard');
+  card.style.animation='none';card.offsetHeight;
+  card.style.animation='slideUp 0.3s ease';
+}
+
+function checkSW(isCorrect,btn,q){
+  if(swAnswered)return;
+  swAnswered=true;
+  btn.classList.add(isCorrect?'correct':'wrong');
+  if(isCorrect){
+    swScore++;
+  } else {
+    document.querySelectorAll('.sw-opt').forEach(b=>{
+      if(b.textContent===q.w)b.classList.add('correct');
+    });
+  }
+  document.querySelectorAll('.sw-opt').forEach(b=>b.style.pointerEvents='none');
+
+  const fb=document.getElementById('swFeedback');
+  document.getElementById('swFbIcon').textContent=isCorrect?'🎉':'💪';
+  document.getElementById('swFbTitle').textContent=isCorrect?'정답!':'아쉬워요';
+  document.getElementById('swFbMsg').textContent=isCorrect
+    ?`"${q.w}" — ${q.kr}`
+    :`정답은 "${q.w}" (${q.kr})`;
+  fb.className='sw-feedback show '+(isCorrect?'ok':'ng');
+}
+
+function swNext(){
+  swCurrent++;
+  if(swCurrent>=swQuestions.length){
+    showSWResult();
+  } else {
+    renderSWQ();
+  }
+}
+
+function showSWResult(){
+  document.getElementById('swQCard').style.display='none';
+  document.getElementById('swOptions').style.display='none';
+  document.getElementById('swFeedback').classList.remove('show');
+  const total=swQuestions.length;
+  const pct=Math.round(swScore/total*100);
+  let emoji='🏆',msg='';
+  if(pct>=90){emoji='🥇';msg='사이트워드 마스터! 🦸';}
+  else if(pct>=70){emoji='🥈';msg='조금만 더 연습해봐요!';}
+  else{emoji='💪';msg='카드로 다시 연습해봐요!';}
+  document.getElementById('swResultEmoji').textContent=emoji;
+  document.getElementById('swResultScore').innerHTML=
+    `<span style="color:var(--purple)">${swScore}</span><span style="font-size:1.5rem;color:var(--muted)"> / ${total}</span>`;
+  document.getElementById('swResultMsg').textContent=msg;
+  document.getElementById('swResult').classList.add('show');
+}
+
+// ════════════════════════════════
+// GRID MODE
+// ════════════════════════════════
+function renderGrid(){
+  const words=GROUPS[group].words;
+  const grid=document.getElementById('wordGrid');
+  grid.innerHTML='';
+  words.forEach((w,i)=>{
+    const key=`${group}_${i}`;
+    const chip=document.createElement('div');
+    chip.className='word-chip'+(mastered[key]?' mastered':'');
+    chip.innerHTML=`
+      <div class="check">✓</div>
+      <span class="word-chip-word">${w.w}</span>
+      <span class="word-chip-kr">${w.kr}</span>
+    `;
+    chip.onclick=()=>speak(w.w);
+    grid.appendChild(chip);
+  });
+}
+
+// ════════════════════════════════
+// START
+// ════════════════════════════════
+init();
+</script>
+</body>
+</html>

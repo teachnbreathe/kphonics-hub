@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flash Cards — K-Phonics Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red:#FF4B5C; --blue:#2D7DD2; --green:#06D6A0;
+  --yellow:#FFD166; --purple:#9B5DE5;
+  --bg:#F8F9FF; --card:#FFFFFF; --text:#1A1A2E; --muted:#9A9AB0;
+  --border:#E5E7F0; --shadow:0 8px 30px rgba(0,0,0,0.08);
+  --radius:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 16px 60px;
+}
+
+/* TOP BAR */
+.topbar{
+  width:100%;max-width:580px;
+  display:flex;align-items:center;gap:12px;
+  padding:16px 0 20px;
+}
+.back-btn{
+  width:42px;height:42px;border-radius:13px;
+  background:white;border:1.5px solid var(--border);
+  color:var(--text);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0;box-shadow:var(--shadow);
+}
+.back-btn:hover{border-color:var(--purple);color:var(--purple);}
+.page-title{
+  font-family:'Baloo 2',cursive;font-size:1.4rem;
+  font-weight:800;color:var(--text);flex:1;
+}
+
+/* VOWEL TABS */
+.vowel-tabs{
+  display:flex;gap:8px;justify-content:center;
+  margin-bottom:24px;width:100%;max-width:580px;
+}
+.vtab{
+  flex:1;padding:10px 4px;border-radius:14px;
+  border:2px solid var(--border);background:white;
+  font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;
+  cursor:pointer;transition:all 0.2s;color:var(--muted);
+  box-shadow:var(--shadow);
+}
+.vtab.active-a{border-color:var(--red);background:var(--red);color:white;box-shadow:0 6px 20px rgba(255,75,92,0.3);}
+.vtab.active-e{border-color:var(--blue);background:var(--blue);color:white;box-shadow:0 6px 20px rgba(45,125,210,0.3);}
+.vtab.active-i{border-color:var(--green);background:var(--green);color:white;box-shadow:0 6px 20px rgba(6,214,160,0.3);}
+.vtab.active-o{border-color:var(--yellow);background:var(--yellow);color:var(--text);box-shadow:0 6px 20px rgba(255,209,102,0.3);}
+.vtab.active-u{border-color:var(--purple);background:var(--purple);color:white;box-shadow:0 6px 20px rgba(155,93,229,0.3);}
+
+/* VOWEL BANNER */
+.vowel-banner{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:20px;width:100%;max-width:580px;
+  padding:16px 20px;background:white;
+  border-radius:18px;border:1.5px solid var(--border);
+  box-shadow:var(--shadow);
+}
+.vowel-hero{
+  width:60px;height:60px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Baloo 2',cursive;font-size:2rem;font-weight:900;
+  color:white;flex-shrink:0;
+}
+.vowel-info h2{
+  font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:var(--text);
+}
+.vowel-info p{font-size:0.82rem;font-weight:600;color:var(--muted);}
+
+/* WORD GRID */
+.word-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+  gap:12px;width:100%;max-width:580px;
+}
+
+/* WORD CARD */
+.word-card{
+  background:white;border-radius:var(--radius);
+  border:1.5px solid var(--border);
+  box-shadow:var(--shadow);
+  padding:16px 10px 14px;
+  cursor:pointer;text-align:center;
+  position:relative;overflow:hidden;
+  transition:transform 0.15s,box-shadow 0.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.word-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  border-radius:var(--radius) var(--radius) 0 0;
+}
+.word-card.v-a::before{background:var(--red);}
+.word-card.v-e::before{background:var(--blue);}
+.word-card.v-i::before{background:var(--green);}
+.word-card.v-o::before{background:var(--yellow);}
+.word-card.v-u::before{background:var(--purple);}
+
+.word-card:hover{transform:translateY(-4px);box-shadow:0 14px 35px rgba(0,0,0,0.12);}
+.word-card:active{transform:scale(0.94);}
+.word-card.playing{transform:scale(1.05);box-shadow:0 16px 40px rgba(0,0,0,0.15);}
+
+/* EMOJI */
+.word-emoji{
+  font-size:2.5rem;line-height:1;margin-bottom:8px;display:block;
+  transition:transform 0.3s cubic-bezier(.68,-.55,.27,1.55);
+}
+.word-card.playing .word-emoji{transform:scale(1.2) rotate(-5deg);}
+
+/* LETTER BOXES */
+.word-letters{
+  display:flex;justify-content:center;align-items:center;
+  gap:3px;margin-bottom:6px;
+}
+.letter-box{
+  width:28px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;color:white;
+}
+.letter-box.con{background:#4A4E69;}
+.letter-box.vow-a{background:var(--red);}
+.letter-box.vow-e{background:var(--blue);}
+.letter-box.vow-i{background:var(--green);}
+.letter-box.vow-o{background:var(--yellow);color:var(--text);}
+.letter-box.vow-u{background:var(--purple);}
+
+/* bounce animation */
+.word-card.playing .letter-box{animation:lbounce 0.45s ease forwards;}
+.word-card.playing .letter-box:nth-child(1){animation-delay:0s;}
+.word-card.playing .letter-box:nth-child(2){animation-delay:0.1s;}
+.word-card.playing .letter-box:nth-child(3){animation-delay:0.2s;}
+.word-card.playing .letter-box:nth-child(4){animation-delay:0.3s;}
+@keyframes lbounce{
+  0%{transform:translateY(0);}
+  40%{transform:translateY(-10px);}
+  70%{transform:translateY(3px);}
+  100%{transform:translateY(0);}
+}
+
+/* WORD TEXT */
+.word-text{
+  font-family:'Baloo 2',cursive;font-size:1.2rem;
+  font-weight:800;color:var(--text);
+}
+
+/* SOUND WAVE */
+.sound-wave{
+  display:none;justify-content:center;align-items:center;
+  gap:3px;height:16px;margin-top:4px;
+}
+.word-card.playing .sound-wave{display:flex;}
+.sbar{width:3px;border-radius:2px;animation:swave 0.6s ease-in-out infinite alternate;}
+.sbar:nth-child(1){height:5px;animation-delay:0s;}
+.sbar:nth-child(2){height:11px;animation-delay:0.1s;}
+.sbar:nth-child(3){height:16px;animation-delay:0.2s;}
+.sbar:nth-child(4){height:11px;animation-delay:0.1s;}
+.sbar:nth-child(5){height:5px;animation-delay:0s;}
+@keyframes swave{from{transform:scaleY(0.4);}to{transform:scaleY(1);}}
+.v-a .sbar{background:var(--red);}
+.v-e .sbar{background:var(--blue);}
+.v-i .sbar{background:var(--green);}
+.v-o .sbar{background:var(--yellow);}
+.v-u .sbar{background:var(--purple);}
+
+footer{
+  margin-top:40px;text-align:center;
+  font-size:0.75rem;color:var(--muted);font-weight:700;
+}
+
+/* 예외 단어 박스 */
+.exception-box{
+  width:100%;max-width:580px;
+  margin-top:20px;
+  background:#FFFBF0;
+  border:1.5px solid #FFD166;
+  border-radius:18px;padding:20px;
+}
+.exception-title{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;
+  color:#B8860B;margin-bottom:14px;
+}
+.exception-list{display:flex;flex-direction:column;gap:10px;}
+.exception-item{
+  display:flex;align-items:flex-start;gap:12px;
+  background:white;border-radius:12px;padding:12px 14px;
+  border:1px solid #FFE599;
+}
+.ex-word{
+  display:flex;flex-direction:column;align-items:center;
+  gap:2px;flex-shrink:0;min-width:52px;
+}
+.ex-emoji{font-size:1.6rem;line-height:1;}
+.ex-label{
+  font-family:'Baloo 2',cursive;font-size:0.9rem;
+  font-weight:800;color:#B8860B;
+}
+.ex-reason{
+  font-size:0.8rem;font-weight:600;
+  color:var(--muted);line-height:1.5;padding-top:2px;
+}
+.ex-reason strong{color:var(--text);font-weight:800;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="back-btn" onclick="location.href='index.html'">←</button>
+  <div class="page-title">🎴 Flash Cards</div>
+</div>
+
+<div class="vowel-tabs" id="vowelTabs"></div>
+<div class="vowel-banner" id="vowelBanner"></div>
+<div class="word-grid" id="wordGrid"></div>
+<div class="exception-box" id="exceptionBox" style="display:none"></div>
+
+<footer>K-Phonics OPS™ · teachnbreathe.tistory.com</footer>
+
+<script>
+const DATA={
+  a:{color:'#FF4B5C',label:'단모음 A',sound:'short a — /æ/',words:[
+    {w:'cat',e:'🐱'},{w:'bat',e:'🦇'},{w:'hat',e:'🎩'},
+    {w:'man',e:'🧍'},{w:'van',e:'🚐'},{w:'pan',e:'🍳'},
+    {w:'bag',e:'👜'},{w:'map',e:'🗺️'},{w:'tap',e:'🚰'},
+    {w:'sad',e:'😢'},{w:'jam',e:'🍇'},{w:'cap',e:'🧢'},
+  ]},
+  e:{color:'#2D7DD2',label:'단모음 E',sound:'short e — /ɛ/',words:[
+    {w:'bed',e:'🛏️'},{w:'red',e:'🍎'},{w:'hen',e:'🐔'},
+    {w:'ten',e:'🔟'},{w:'pet',e:'🐾'},{w:'leg',e:'🦵'},
+    {w:'net',e:'🥅'},{w:'web',e:'🕸️'},{w:'jet',e:'✈️'},
+    {w:'pen',e:'🖊️'},{w:'gem',e:'💎'},{w:'peg',e:'📌'},
+  ]},
+  i:{color:'#06D6A0',label:'단모음 I',sound:'short i — /ɪ/',words:[
+    {w:'pig',e:'🐷'},{w:'big',e:'🏔️'},{w:'dig',e:'⛏️'},
+    {w:'bin',e:'🗑️'},{w:'fin',e:'🐟'},{w:'pin',e:'📍'},
+    {w:'bit',e:'🪙'},{w:'sit',e:'🪑'},{w:'lip',e:'💋'},
+    {w:'mix',e:'🥣'},{w:'six',e:'6️⃣'},{w:'wig',e:'💇'},
+  ]},
+  o:{color:'#FFD166',label:'단모음 O',sound:'short o — /ɑ/',words:[
+    {w:'cob',e:'🌽'},{w:'cod',e:'🐟'},{w:'cop',e:'👮'},
+    {w:'pot',e:'🪴'},{w:'hot',e:'🔥'},{w:'dot',e:'⚫'},
+    {w:'box',e:'📦'},{w:'hop',e:'🐸'},{w:'top',e:'🎯'},
+    {w:'mop',e:'🧹'},{w:'sob',e:'😭'},{w:'nod',e:'😌'},
+  ],
+  exceptions:[
+    {w:'dog',e:'🐶',reason:'-og 패턴: 미국식 영어(GA)에서 /ɔːg/로 발음. 단모음 /ɑ/ 규칙 예외.'},
+    {w:'log',e:'🪵',reason:'-og 패턴: /lɔːg/. dog와 동일한 모음 이완 현상(vowel laxing).'},
+    {w:'fog',e:'🌫️',reason:'-og 패턴: /fɔːg/. cot-caught merger가 없는 방언에서 특히 두드러짐.'},
+  ]},
+  u:{color:'#9B5DE5',label:'단모음 U',sound:'short u — /ʌ/',words:[
+    {w:'bug',e:'🐛'},{w:'hug',e:'🤗'},{w:'mug',e:'☕'},
+    {w:'bun',e:'🍞'},{w:'run',e:'🏃'},{w:'sun',e:'☀️'},
+    {w:'bus',e:'🚌'},{w:'cup',e:'🥤'},{w:'pup',e:'🐶'},
+    {w:'mud',e:'🟫'},{w:'cut',e:'✂️'},{w:'nut',e:'🥜'},
+  ]}
+};
+
+const VOWELS=['a','e','i','o','u'];
+let current='a';
+const synth=window.speechSynthesis;
+
+function getVoice(){
+  const v=synth.getVoices();
+  return v.find(x=>x.lang.startsWith('en-US'))
+    ||v.find(x=>x.lang.startsWith('en-GB'))
+    ||v.find(x=>x.lang.startsWith('en'))||null;
+}
+if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=()=>{};
+
+function speak(word,card){
+  synth.cancel();
+  document.querySelectorAll('.word-card.playing').forEach(c=>c.classList.remove('playing'));
+  card.classList.add('playing');
+  // 단어 2번 재생
+  const u1=new SpeechSynthesisUtterance(word);
+  u1.rate=0.8;u1.pitch=1.0;
+  const v=getVoice();if(v)u1.voice=v;
+  synth.speak(u1);
+  setTimeout(()=>{
+    const u2=new SpeechSynthesisUtterance(word);
+    u2.rate=0.8;u2.pitch=1.0;
+    const v2=getVoice();if(v2)u2.voice=v2;
+    u2.onend=()=>card.classList.remove('playing');
+    synth.speak(u2);
+  },800);
+}
+
+function buildTabs(){
+  const c=document.getElementById('vowelTabs');
+  VOWELS.forEach(v=>{
+    const btn=document.createElement('button');
+    btn.className='vtab'+(v===current?' active-'+v:'');
+    btn.textContent=v.toUpperCase();
+    btn.onclick=()=>{current=v;render();};
+    c.appendChild(btn);
+  });
+}
+
+function render(){
+  document.querySelectorAll('.vtab').forEach((t,i)=>{
+    const v=VOWELS[i];
+    t.className='vtab'+(v===current?' active-'+v:'');
+  });
+  const d=DATA[current];
+
+  // 배너
+  document.getElementById('vowelBanner').innerHTML=`
+    <div class="vowel-hero" style="background:${d.color}">
+      ${current.toUpperCase()}
+    </div>
+    <div class="vowel-info">
+      <h2>${d.label}</h2>
+      <p>${d.sound}</p>
+    </div>
+  `;
+
+  // 카드 그리드
+  const grid=document.getElementById('wordGrid');
+  grid.innerHTML='';
+  d.words.forEach(item=>{
+    const card=document.createElement('div');
+    card.className=`word-card v-${current}`;
+    const boxes=item.w.split('').map(l=>{
+      const isV=l===current;
+      return `<div class="letter-box ${isV?'vow-'+current:'con'}">${l}</div>`;
+    }).join('');
+    card.innerHTML=`
+      <span class="word-emoji">${item.e}</span>
+      <div class="word-letters">${boxes}</div>
+      <div class="word-text">${item.w}</div>
+      <div class="sound-wave">
+        <div class="sbar"></div><div class="sbar"></div>
+        <div class="sbar"></div><div class="sbar"></div>
+        <div class="sbar"></div>
+      </div>`;
+    card.addEventListener('click',()=>speak(item.w,card));
+    grid.appendChild(card);
+  });
+
+  // 예외 단어 박스 (해당 모음에 exceptions 있을 때만)
+  const exBox=document.getElementById('exceptionBox');
+  if(d.exceptions && d.exceptions.length>0){
+    exBox.style.display='block';
+    exBox.innerHTML=`
+      <div class="exception-title">
+        ⚠️ 이 단어들은 왜 목록에서 뺐을까요?
+      </div>
+      <div class="exception-list">
+        ${d.exceptions.map(ex=>`
+          <div class="exception-item">
+            <div class="ex-word">
+              <span class="ex-emoji">${ex.e}</span>
+              <span class="ex-label">${ex.w}</span>
+            </div>
+            <div class="ex-reason">${ex.reason}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:14px;padding:10px 14px;background:rgba(155,93,229,0.06);
+        border-radius:10px;border-left:3px solid var(--purple);">
+        <div style="font-size:0.78rem;font-weight:800;color:var(--purple);margin-bottom:4px;">
+          📌 수업 활용 팁
+        </div>
+        <div style="font-size:0.78rem;font-weight:600;color:var(--muted);line-height:1.6;">
+          위 단어들은 <strong style="color:var(--text)">3학년 1학기에는 Sight Word</strong>로 별도 제시하고,
+          단모음 o의 소리 규칙을 충분히 익힌 후에 "이 단어는 특별해요!" 방식으로
+          도입하는 것을 권장합니다. <strong style="color:var(--text)">-og 패턴</strong>은
+          미국 영어에서 모음이 늘어나는 현상(vowel lengthening)이 일어나므로
+          이 단계에서는 소리 노출 위주로 접근하세요.
+        </div>
+      </div>
+    `;
+  } else {
+    exBox.style.display='none';
+  }
+}
+
+buildTabs();
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# 모든 파일 기본 제외
+*
+
+# HTML과 JS 파일만 허용
+!*.html
+!*.js
+!.gitignore
+
+# 하위 폴더 접근 허용
+!files/
+!files/*.html
+!files/*.js

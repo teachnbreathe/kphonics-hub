@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Books — K-Phonics Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800;900&family=Bangers&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red:#FF4B5C; --blue:#2D7DD2; --green:#06D6A0;
+  --yellow:#FFD166; --purple:#9B5DE5; --orange:#FF8C42;
+  --bg:#F8F9FF; --card:#FFFFFF; --card2:#F3F4F8;
+  --text:#1A1A2E; --muted:#8888AA; --border:#E5E7F0;
+  --radius:20px; --shadow:0 8px 30px rgba(0,0,0,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);min-height:100vh;color:var(--text);
+}
+.wrap{
+  max-width:520px;margin:0 auto;
+  padding:0 16px 80px;
+  display:flex;flex-direction:column;align-items:center;
+}
+
+/* TOP BAR */
+.topbar{
+  width:100%;display:flex;align-items:center;gap:12px;
+  padding:16px 0 20px;
+}
+.back-btn{
+  width:42px;height:42px;border-radius:13px;
+  background:white;border:1.5px solid var(--border);
+  color:var(--text);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0;
+  box-shadow:var(--shadow);
+}
+.back-btn:hover{border-color:var(--purple);color:var(--purple);}
+.page-title{
+  font-family:'Baloo 2',cursive;font-size:1.4rem;
+  font-weight:800;color:var(--text);flex:1;
+}
+
+/* BOOK LIST */
+.book-list{width:100%;display:flex;flex-direction:column;gap:14px;}
+.book-card{
+  background:white;border:1.5px solid var(--border);
+  border-radius:22px;padding:18px;
+  display:flex;align-items:center;gap:16px;
+  cursor:pointer;transition:all 0.25s;
+  box-shadow:var(--shadow);
+}
+.book-card:not(.locked):hover{
+  transform:translateY(-3px);
+  box-shadow:0 16px 40px rgba(0,0,0,0.12);
+  border-color:var(--purple);
+}
+.book-card.locked{opacity:0.4;pointer-events:none;filter:grayscale(0.5);}
+.book-cover{
+  width:68px;height:88px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;flex-shrink:0;position:relative;
+}
+.book-cover::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;
+  width:7px;background:rgba(0,0,0,0.12);border-radius:0 12px 12px 0;
+}
+.book-info{flex:1;}
+.book-level{font-size:0.68rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.book-title{font-family:'Baloo 2',cursive;font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:4px;}
+.book-desc{font-size:0.78rem;font-weight:600;color:var(--muted);}
+.book-arrow{font-size:1.5rem;color:var(--muted);flex-shrink:0;}
+
+/* READER */
+.reader{display:none;width:100%;flex-direction:column;align-items:center;gap:16px;}
+.reader.show{display:flex;}
+
+/* PAGE CARD */
+.page-card{
+  width:100%;background:white;
+  border:1.5px solid var(--border);
+  border-radius:28px;padding:28px 24px 32px;
+  text-align:center;min-height:360px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:20px;
+  position:relative;overflow:hidden;
+  box-shadow:var(--shadow);
+  animation:pageSlide 0.35s cubic-bezier(.25,.46,.45,.94);
+}
+.page-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:5px;
+  border-radius:28px 28px 0 0;
+  background:linear-gradient(90deg,var(--purple),var(--blue));
+}
+@keyframes pageSlide{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+
+.page-num{
+  position:absolute;top:16px;right:20px;
+  font-size:0.72rem;font-weight:800;color:var(--muted);letter-spacing:1px;
+}
+.read-mode-banner{
+  display:none;position:absolute;top:14px;left:16px;
+  background:rgba(155,93,229,0.1);border:1px solid rgba(155,93,229,0.3);
+  border-radius:50px;padding:4px 12px;
+  font-size:0.7rem;font-weight:800;color:var(--purple);
+  letter-spacing:1px;
+}
+.read-mode-banner.show{display:block;}
+
+/* SCENE EMOJI */
+.page-scene{
+  font-size:5.5rem;line-height:1;
+  animation:sceneFloat 3s ease-in-out infinite alternate;
+}
+@keyframes sceneFloat{from{transform:translateY(0);}to{transform:translateY(-10px);}}
+
+/* SENTENCE */
+.page-sentence{
+  display:flex;flex-wrap:wrap;align-items:center;
+  justify-content:center;
+  gap:6px 10px;  /* ← 단어 간격 확실히 */
+  max-width:420px;
+}
+
+/* phonics word */
+.phword{
+  display:inline-flex;gap:3px;align-items:center;
+}
+.pl{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:34px;border-radius:8px;
+  font-family:'Baloo 2',cursive;font-size:1.05rem;font-weight:700;color:white;
+}
+.pl.c{background:#4A4E69;}
+.pl.va{background:var(--red);}
+.pl.ve{background:var(--blue);}
+.pl.vi{background:var(--green);}
+.pl.vo{background:var(--yellow);color:var(--text);}
+.pl.vu{background:var(--purple);}
+
+/* sight word (다시읽기 강조) */
+.sw-word{
+  font-family:'Baloo 2',cursive;
+  font-size:clamp(1.3rem,5vw,1.6rem);font-weight:800;
+  color:var(--purple);
+}
+
+/* plain word */
+.plain-word{
+  font-family:'Baloo 2',cursive;
+  font-size:clamp(1.3rem,5vw,1.6rem);font-weight:800;
+  color:var(--text);
+}
+
+/* CONTROLS */
+.reader-controls{
+  display:flex;gap:10px;align-items:center;width:100%;
+}
+.rd-btn{
+  width:52px;height:52px;border-radius:14px;
+  border:1.5px solid var(--border);background:white;
+  color:var(--text);font-size:1.3rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0;box-shadow:var(--shadow);
+}
+.rd-btn:hover{border-color:var(--purple);color:var(--purple);}
+.rd-btn:disabled{opacity:0.25;pointer-events:none;}
+.rd-speak{
+  flex:1;height:52px;
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+  border:none;border-radius:14px;color:white;
+  font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:800;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all 0.2s;box-shadow:0 6px 20px rgba(155,93,229,0.3);
+}
+.rd-speak:hover{transform:translateY(-2px);}
+.rd-speak.playing{animation:spkPulse 0.6s infinite alternate;}
+@keyframes spkPulse{from{box-shadow:0 6px 20px rgba(155,93,229,0.3);}to{box-shadow:0 6px 35px rgba(155,93,229,0.6);}}
+
+.page-dots{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;}
+.dot{width:7px;height:7px;border-radius:50%;background:#E5E7F0;transition:all 0.3s;}
+.dot.active{background:var(--purple);width:20px;border-radius:4px;}
+
+.rd-close{
+  width:100%;background:white;
+  border:1.5px solid var(--border);border-radius:14px;padding:12px;
+  font-family:'Nunito',sans-serif;font-size:0.85rem;font-weight:800;
+  color:var(--muted);cursor:pointer;transition:all 0.2s;
+}
+.rd-close:hover{border-color:var(--red);color:var(--red);}
+
+/* WORD CARD PAGE */
+.wordcard-page{
+  width:100%;background:white;
+  border:1.5px solid var(--border);
+  border-radius:28px;padding:28px 20px;
+  display:none;flex-direction:column;align-items:center;gap:20px;
+  box-shadow:var(--shadow);
+  animation:pageSlide 0.35s ease;
+}
+.wordcard-page.show{display:flex;}
+.wc-title{
+  font-family:'Baloo 2',cursive;font-size:1.3rem;
+  font-weight:800;color:var(--purple);
+}
+.wc-subtitle{
+  font-size:0.8rem;font-weight:700;color:var(--muted);
+  margin-top:-14px;
+}
+.wc-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));
+  gap:10px;width:100%;
+}
+.wc-item{
+  background:var(--card2);border-radius:16px;padding:14px 8px;
+  text-align:center;cursor:pointer;transition:all 0.2s;
+  border:1.5px solid var(--border);
+}
+.wc-item:hover{transform:translateY(-3px);border-color:var(--purple);box-shadow:0 6px 20px rgba(155,93,229,0.15);}
+.wc-item.playing{background:rgba(155,93,229,0.08);border-color:var(--purple);}
+.wc-emoji{font-size:1.8rem;display:block;margin-bottom:5px;}
+.wc-word{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:var(--purple);margin-bottom:2px;}
+.wc-kr{font-size:0.7rem;font-weight:700;color:var(--muted);}
+.wc-bars{display:flex;align-items:center;justify-content:center;gap:2px;height:12px;margin-top:4px;}
+.wc-bar{width:2px;border-radius:1px;background:var(--purple);height:4px;}
+.wc-item.playing .wc-bar{animation:wcwave 0.5s ease-in-out infinite alternate;}
+.wc-bar:nth-child(1){animation-delay:0s;}
+.wc-bar:nth-child(2){height:8px;animation-delay:0.1s;}
+.wc-bar:nth-child(3){height:12px;animation-delay:0.2s;}
+.wc-bar:nth-child(4){height:8px;animation-delay:0.1s;}
+.wc-bar:nth-child(5){animation-delay:0s;}
+@keyframes wcwave{from{transform:scaleY(0.3);}to{transform:scaleY(1);}}
+
+/* FINISH */
+.finish-screen{
+  width:100%;background:white;
+  border:1.5px solid var(--border);
+  border-radius:28px;padding:48px 24px;
+  text-align:center;display:none;
+  flex-direction:column;align-items:center;gap:16px;
+  box-shadow:var(--shadow);
+  animation:pageSlide 0.4s ease;
+}
+.finish-screen.show{display:flex;}
+.finish-stars{font-size:3.5rem;}
+.finish-title{
+  font-family:'Baloo 2',cursive;font-size:2rem;font-weight:900;
+  color:var(--purple);
+}
+.finish-msg{font-size:0.9rem;font-weight:600;color:var(--muted);}
+.finish-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.f-btn{
+  border-radius:14px;padding:14px 24px;
+  font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:800;
+  cursor:pointer;transition:all 0.2s;border:none;
+}
+.f-btn.primary{background:linear-gradient(135deg,var(--purple),var(--blue));color:white;box-shadow:0 6px 20px rgba(155,93,229,0.3);}
+.f-btn.secondary{background:white;color:var(--text);border:1.5px solid var(--border);}
+.f-btn:hover{transform:translateY(-2px);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <button class="back-btn" onclick="showList()">←</button>
+    <div class="page-title" id="pageTitle">📖 Mini Books</div>
+  </div>
+
+  <div class="book-list" id="bookList"></div>
+
+  <div class="reader" id="reader">
+    <div class="page-card" id="pageCard">
+      <div class="page-num" id="pageNum">1 / 6</div>
+      <div class="read-mode-banner" id="readModeBanner">📖 다시읽기</div>
+      <div class="page-scene" id="pageScene">📖</div>
+      <div class="page-sentence" id="pageSentence"></div>
+    </div>
+    <div class="page-dots" id="pageDots"></div>
+    <div class="reader-controls">
+      <button class="rd-btn" id="prevBtn" onclick="prevPage()">←</button>
+      <button class="rd-speak" id="speakBtn" onclick="speakPage()">🔊 읽어주기</button>
+      <button class="rd-btn" id="nextBtn" onclick="nextPage()">→</button>
+    </div>
+    <button class="rd-close" onclick="showList()">📚 책 목록으로</button>
+  </div>
+
+  <div class="wordcard-page" id="wordCardPage">
+    <div class="wc-title">⭐ NEW WORDS</div>
+    <div class="wc-subtitle">탭하면 소리를 들을 수 있어요 🔊</div>
+    <div class="wc-grid" id="wcGrid"></div>
+    <div class="reader-controls">
+      <button class="rd-btn" onclick="backFromWC()">←</button>
+      <button class="rd-speak" onclick="startSecondRead()">📖 다시 읽기</button>
+    </div>
+  </div>
+
+  <div class="finish-screen" id="finishScreen">
+    <div class="finish-stars">⭐⭐⭐</div>
+    <div class="finish-title">Phonics Hero! 🦸</div>
+    <div class="finish-msg" id="finishMsg"></div>
+    <div class="finish-btns">
+      <button class="f-btn primary" onclick="readAgain()">다시 읽기 🔄</button>
+      <button class="f-btn secondary" onclick="showList()">다른 책 📚</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const HEROES={
+  a:{color:'#FF4B5C'},e:{color:'#2D7DD2'},
+  i:{color:'#06D6A0'},o:{color:'#FFD166'},u:{color:'#9B5DE5'},
+};
+
+// ═══════════════════════════════════
+// TOKEN RENDERER
+// ═══════════════════════════════════
+function renderTokens(tokens, showHints){
+  return tokens.map(t=>{
+    if(t.type==='ph'){
+      const letters=t.word.split('').map(l=>{
+        const cls=l===t.vowel?'v'+t.vowel:'c';
+        return `<span class="pl ${cls}">${l}</span>`;
+      }).join('');
+      return `<span class="phword">${letters}</span>`;
+    } else if(t.type==='sw' && showHints){
+      return `<span class="sw-word">${t.word}</span>`;
+    } else {
+      return `<span class="plain-word">${t.word}</span>`;
+    }
+  }).join('');
+}
+
+// ═══════════════════════════════════
+// BOOKS DATA — 이모지 문장 내용 일치 수정
+// ═══════════════════════════════════
+const BOOKS=[
+{id:1,level:'Level 1',locked:false,
+ title:'Sam and the Cat',
+ desc:'단모음 a · 사이트워드: this, is, the, a, my',
+ vowel:'a',cover:'🐱',
+ pages:[
+  {bg:'👦',speak:'This is Sam.',
+   tokens:[{type:'sw',word:'This'},{type:'sw',word:'is'},{type:'sw',word:'Sam'},{type:'plain',word:'.'}]},
+  {bg:'🐱',speak:'Sam has a cat.',
+   tokens:[{type:'sw',word:'Sam'},{type:'sw',word:'has'},{type:'sw',word:'a'},{type:'ph',word:'cat',vowel:'a'},{type:'plain',word:'.'}]},
+  {bg:'🐱😤',speak:'The cat is fat.',
+   tokens:[{type:'sw',word:'The'},{type:'ph',word:'cat',vowel:'a'},{type:'sw',word:'is'},{type:'ph',word:'fat',vowel:'a'},{type:'plain',word:'.'}]},
+  {bg:'🐱💤',speak:'The fat cat sat.',
+   tokens:[{type:'sw',word:'The'},{type:'ph',word:'fat',vowel:'a'},{type:'ph',word:'cat',vowel:'a'},{type:'ph',word:'sat',vowel:'a'},{type:'plain',word:'.'}]},
+  {bg:'😄🐱',speak:'"My cat!" said Sam.',
+   tokens:[{type:'plain',word:'"'},{type:'sw',word:'My'},{type:'ph',word:'cat',vowel:'a'},{type:'plain',word:'!"'},{type:'sw',word:'said'},{type:'sw',word:'Sam'},{type:'plain',word:'.'}]},
+  {bg:'😴🐱',speak:'Sam and the cat nap.',
+   tokens:[{type:'sw',word:'Sam'},{type:'sw',word:'and'},{type:'sw',word:'the'},{type:'ph',word:'cat',vowel:'a'},{type:'sw',word:'nap'},{type:'plain',word:'.'}]},
+ ],
+ wordCards:[{word:'Sam',emoji:'👦',kr:'샘(이름)'},{word:'has',emoji:'🤝',kr:'가지다'},{word:'My',emoji:'👆',kr:'나의'},{word:'said',emoji:'💬',kr:'말했다'},{word:'nap',emoji:'😴',kr:'낮잠 자다'}]
+},
+{id:2,level:'Level 1',locked:false,
+ title:'Ed and the Red Hen',
+ desc:'단모음 e · 사이트워드: see, like, look, are',
+ vowel:'e',cover:'🐔',
+ pages:[
+  {bg:'👦',speak:'This is Ed.',
+   tokens:[{type:'sw',word:'This'},{type:'sw',word:'is'},{type:'sw',word:'Ed'},{type:'plain',word:'.'}]},
+  {bg:'👀🐔',speak:'Ed can see a hen.',
+   tokens:[{type:'sw',word:'Ed'},{type:'sw',word:'can'},{type:'sw',word:'see'},{type:'sw',word:'a'},{type:'ph',word:'hen',vowel:'e'},{type:'plain',word:'.'}]},
+  {bg:'🐔❤️',speak:'The hen is red.',
+   tokens:[{type:'sw',word:'The'},{type:'ph',word:'hen',vowel:'e'},{type:'sw',word:'is'},{type:'ph',word:'red',vowel:'e'},{type:'plain',word:'.'}]},
+  {bg:'😄🐔',speak:'"I like the red hen!" said Ed.',
+   tokens:[{type:'plain',word:'"I'},{type:'sw',word:'like'},{type:'sw',word:'the'},{type:'ph',word:'red',vowel:'e'},{type:'ph',word:'hen',vowel:'e'},{type:'plain',word:'!"'},{type:'sw',word:'said'},{type:'sw',word:'Ed'},{type:'plain',word:'.'}]},
+  {bg:'🥚🥚🥚',speak:'Look! The hen has ten eggs.',
+   tokens:[{type:'sw',word:'Look'},{type:'plain',word:'!'},{type:'sw',word:'The'},{type:'ph',word:'hen',vowel:'e'},{type:'sw',word:'has'},{type:'plain',word:'ten'},{type:'plain',word:'eggs.'},{type:'plain',word:''}]},
+  {bg:'😊🐔👦',speak:'Ed and the hen are happy.',
+   tokens:[{type:'sw',word:'Ed'},{type:'sw',word:'and'},{type:'sw',word:'the'},{type:'ph',word:'hen',vowel:'e'},{type:'sw',word:'are'},{type:'plain',word:'happy.'}]},
+ ],
+ wordCards:[{word:'Ed',emoji:'👦',kr:'에드(이름)'},{word:'like',emoji:'❤️',kr:'좋아하다'},{word:'Look',emoji:'👀',kr:'봐!'},{word:'eggs',emoji:'🥚',kr:'달걀'},{word:'happy',emoji:'😊',kr:'행복한'}]
+},
+{id:3,level:'Level 1',locked:false,
+ title:'Big Pip',
+ desc:'단모음 i · 사이트워드: he, she, we, can',
+ vowel:'i',cover:'👧',
+ pages:[
+  {bg:'👧',speak:'This is Pip.',
+   tokens:[{type:'sw',word:'This'},{type:'sw',word:'is'},{type:'sw',word:'Pip'},{type:'plain',word:'.'}]},
+  {bg:'💪👧',speak:'Pip is big.',
+   tokens:[{type:'sw',word:'Pip'},{type:'sw',word:'is'},{type:'ph',word:'big',vowel:'i'},{type:'plain',word:'.'}]},
+  {bg:'⛏️',speak:'He can dig.',
+   tokens:[{type:'sw',word:'He'},{type:'sw',word:'can'},{type:'ph',word:'dig',vowel:'i'},{type:'plain',word:'.'}]},
+  {bg:'🪑⛏️',speak:'She can sit and dig.',
+   tokens:[{type:'sw',word:'She'},{type:'sw',word:'can'},{type:'ph',word:'sit',vowel:'i'},{type:'sw',word:'and'},{type:'ph',word:'dig',vowel:'i'},{type:'plain',word:'.'}]},
+  {bg:'👫⛏️',speak:'We can dig!',
+   tokens:[{type:'sw',word:'We'},{type:'sw',word:'can'},{type:'ph',word:'dig',vowel:'i'},{type:'plain',word:'!'}]},
+  {bg:'🏆👧',speak:'Pip did it!',
+   tokens:[{type:'sw',word:'Pip'},{type:'plain',word:'did'},{type:'sw',word:'it'},{type:'plain',word:'!'}]},
+ ],
+ wordCards:[{word:'Pip',emoji:'👧',kr:'핍(이름)'},{word:'dig',emoji:'⛏️',kr:'파다'},{word:'sit',emoji:'🪑',kr:'앉다'},{word:'did',emoji:'✅',kr:'했다'}]
+},
+{id:4,level:'Level 1',locked:false,
+ title:'Don and the Hot Dog',
+ desc:'단모음 o · 사이트워드: one, two, can, not',
+ vowel:'o',cover:'🐶',
+ pages:[
+  {bg:'👦',speak:'This is Don.',
+   tokens:[{type:'sw',word:'This'},{type:'sw',word:'is'},{type:'sw',word:'Don'},{type:'plain',word:'.'}]},
+  {bg:'👦🐶',speak:'Don has one dog.',
+   tokens:[{type:'sw',word:'Don'},{type:'sw',word:'has'},{type:'sw',word:'one'},{type:'ph',word:'dog',vowel:'o'},{type:'plain',word:'.'}]},
+  {bg:'🐶🥵',speak:'The dog is hot.',
+   tokens:[{type:'sw',word:'The'},{type:'ph',word:'dog',vowel:'o'},{type:'sw',word:'is'},{type:'ph',word:'hot',vowel:'o'},{type:'plain',word:'.'}]},
+  {bg:'🧹🧹',speak:'Don can see two mops.',
+   tokens:[{type:'sw',word:'Don'},{type:'sw',word:'can'},{type:'sw',word:'see'},{type:'sw',word:'two'},{type:'ph',word:'mops',vowel:'o'},{type:'plain',word:'.'}]},
+  {bg:'🐶😎',speak:'The dog is not hot now.',
+   tokens:[{type:'sw',word:'The'},{type:'ph',word:'dog',vowel:'o'},{type:'sw',word:'is'},{type:'sw',word:'not'},{type:'ph',word:'hot',vowel:'o'},{type:'plain',word:'now.'},{type:'plain',word:''}]},
+  {bg:'🐶🎉',speak:'Don and the dog hop!',
+   tokens:[{type:'sw',word:'Don'},{type:'sw',word:'and'},{type:'sw',word:'the'},{type:'ph',word:'dog',vowel:'o'},{type:'ph',word:'hop',vowel:'o'},{type:'plain',word:'!'}]},
+ ],
+ wordCards:[{word:'Don',emoji:'👦',kr:'돈(이름)'},{word:'one',emoji:'1️⃣',kr:'하나'},{word:'two',emoji:'2️⃣',kr:'둘'},{word:'not',emoji:'❌',kr:'아니다'},{word:'now',emoji:'⏰',kr:'지금'}]
+},
+{id:5,level:'Level 1',locked:false,
+ title:'Bud Runs',
+ desc:'단모음 u · 사이트워드: can, not, up, and, but',
+ vowel:'u',cover:'🏃',
+ pages:[
+  {bg:'👦',speak:'This is Bud.',
+   tokens:[{type:'sw',word:'This'},{type:'sw',word:'is'},{type:'sw',word:'Bud'},{type:'plain',word:'.'}]},
+  {bg:'🏃',speak:'Bud can run.',
+   tokens:[{type:'sw',word:'Bud'},{type:'sw',word:'can'},{type:'ph',word:'run',vowel:'u'},{type:'plain',word:'.'}]},
+  {bg:'🙅',speak:'Bud is not big.',
+   tokens:[{type:'sw',word:'Bud'},{type:'sw',word:'is'},{type:'sw',word:'not'},{type:'ph',word:'big',vowel:'i'},{type:'plain',word:'.'}]},
+  {bg:'🦘⬆️',speak:'But Bud can jump up!',
+   tokens:[{type:'sw',word:'But'},{type:'sw',word:'Bud'},{type:'sw',word:'can'},{type:'plain',word:'jump'},{type:'sw',word:'up'},{type:'plain',word:'!'}]},
+  {bg:'📣👧',speak:'"Go, Bud, go!" said Nan.',
+   tokens:[{type:'plain',word:'"Go, Bud, go!"'},{type:'sw',word:'said'},{type:'plain',word:'Nan.'},{type:'plain',word:''}]},
+  {bg:'🏆🏃',speak:'Bud wins!',
+   tokens:[{type:'sw',word:'Bud'},{type:'plain',word:'wins!'},{type:'plain',word:''}]},
+ ],
+ wordCards:[{word:'Bud',emoji:'👦',kr:'버드(이름)'},{word:'jump',emoji:'🦘',kr:'점프하다'},{word:'up',emoji:'⬆️',kr:'위로'},{word:'Nan',emoji:'👧',kr:'낸(이름)'},{word:'wins',emoji:'🏆',kr:'이기다'}]
+},
+{id:6,level:'Level 2',locked:true,
+ title:'The Flag on the Sled',
+ desc:'자음군 fl, sl · 사이트워드 전체',
+ vowel:'a',cover:'🚩',
+ pages:[
+  {bg:'👧',speak:'This is Flo.',
+   tokens:[{type:'sw',word:'This'},{type:'sw',word:'is'},{type:'sw',word:'Flo'},{type:'plain',word:'.'}]},
+  {bg:'🛷',speak:'Flo has a sled.',
+   tokens:[{type:'sw',word:'Flo'},{type:'sw',word:'has'},{type:'sw',word:'a'},{type:'ph',word:'sled',vowel:'e'},{type:'plain',word:'.'}]},
+  {bg:'🚩',speak:'She has a big flag.',
+   tokens:[{type:'sw',word:'She'},{type:'sw',word:'has'},{type:'sw',word:'a'},{type:'ph',word:'flag',vowel:'a'},{type:'plain',word:'.'}]},
+  {bg:'🛷💨',speak:'The sled can go fast!',
+   tokens:[{type:'sw',word:'The'},{type:'ph',word:'sled',vowel:'e'},{type:'sw',word:'can'},{type:'sw',word:'go'},{type:'plain',word:'fast!'},{type:'plain',word:''}]},
+  {bg:'🚩✅',speak:'The flag did not drop.',
+   tokens:[{type:'sw',word:'The'},{type:'ph',word:'flag',vowel:'a'},{type:'plain',word:'did'},{type:'sw',word:'not'},{type:'plain',word:'drop.'},{type:'plain',word:''}]},
+  {bg:'🎉🚩',speak:'Flo and the flag win!',
+   tokens:[{type:'sw',word:'Flo'},{type:'sw',word:'and'},{type:'sw',word:'the'},{type:'ph',word:'flag',vowel:'a'},{type:'plain',word:'win!'},{type:'plain',word:''}]},
+ ],
+ wordCards:[{word:'Flo',emoji:'👧',kr:'플로(이름)'},{word:'sled',emoji:'🛷',kr:'썰매'},{word:'fast',emoji:'💨',kr:'빠른'},{word:'drop',emoji:'⬇️',kr:'떨어지다'},{word:'win',emoji:'🏆',kr:'이기다'}]
+},
+{id:7,level:'Level 2',locked:true,
+ title:'Gram the Frog',
+ desc:'자음군 fr, cr, dr · 사이트워드 전체',
+ vowel:'o',cover:'🐸',
+ pages:[
+  {bg:'🐸',speak:'This is Gram.',
+   tokens:[{type:'sw',word:'This'},{type:'sw',word:'is'},{type:'plain',word:'Gram.'},{type:'plain',word:''}]},
+  {bg:'🐸💚',speak:'Gram is a frog.',
+   tokens:[{type:'plain',word:'Gram'},{type:'sw',word:'is'},{type:'sw',word:'a'},{type:'ph',word:'frog',vowel:'o'},{type:'plain',word:'.'}]},
+  {bg:'🦀',speak:'He can see a crab.',
+   tokens:[{type:'sw',word:'He'},{type:'sw',word:'can'},{type:'sw',word:'see'},{type:'sw',word:'a'},{type:'ph',word:'crab',vowel:'a'},{type:'plain',word:'.'}]},
+  {bg:'🥁🦀',speak:'The crab can drum.',
+   tokens:[{type:'sw',word:'The'},{type:'ph',word:'crab',vowel:'a'},{type:'sw',word:'can'},{type:'ph',word:'drum',vowel:'u'},{type:'plain',word:'.'}]},
+  {bg:'🐸🦀',speak:'Gram and the crab are friends.',
+   tokens:[{type:'plain',word:'Gram'},{type:'sw',word:'and'},{type:'sw',word:'the'},{type:'ph',word:'crab',vowel:'a'},{type:'sw',word:'are'},{type:'plain',word:'friends.'},{type:'plain',word:''}]},
+  {bg:'🐸🎵🦀',speak:'They play and play!',
+   tokens:[{type:'plain',word:'They'},{type:'plain',word:'play'},{type:'sw',word:'and'},{type:'plain',word:'play!'},{type:'plain',word:''}]},
+ ],
+ wordCards:[{word:'Gram',emoji:'🐸',kr:'그램(이름)'},{word:'crab',emoji:'🦀',kr:'게'},{word:'drum',emoji:'🥁',kr:'드럼 치다'},{word:'friends',emoji:'👫',kr:'친구들'},{word:'play',emoji:'🎮',kr:'놀다'}]
+},
+];
+
+// ═══════════════════════════════════
+// STATE & AUDIO
+// ═══════════════════════════════════
+let curBook=null, curPage=0, isWC=false, isSecondRead=false;
+const synth=window.speechSynthesis;
+function getVoice(){const v=synth.getVoices();return v.find(x=>x.lang.startsWith('en-US'))||v.find(x=>x.lang.startsWith('en-GB'))||v.find(x=>x.lang.startsWith('en'))||null;}
+if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=()=>{};
+
+// ═══════════════════════════════════
+// BOOK LIST
+// ═══════════════════════════════════
+function renderBookList(){
+  const list=document.getElementById('bookList');
+  list.innerHTML='';
+  BOOKS.forEach(b=>{
+    const h=HEROES[b.vowel];
+    const card=document.createElement('div');
+    card.className='book-card'+(b.locked?' locked':'');
+    card.innerHTML=`
+      <div class="book-cover" style="background:${h.color}18;border:1.5px solid ${h.color}33;">
+        ${b.cover}
+      </div>
+      <div class="book-info">
+        <div class="book-level">${b.level}${b.locked?' · 🔒':''}</div>
+        <div class="book-title">${b.title}</div>
+        <div class="book-desc">${b.desc}</div>
+      </div>
+      ${b.locked?'<span style="font-size:1.3rem">🔒</span>':'<div class="book-arrow">›</div>'}
+    `;
+    if(!b.locked)card.onclick=()=>openBook(b);
+    list.appendChild(card);
+  });
+}
+
+function openBook(b){
+  curBook=b;curPage=0;isWC=false;isSecondRead=false;
+  document.getElementById('bookList').style.display='none';
+  document.getElementById('reader').classList.add('show');
+  document.getElementById('wordCardPage').classList.remove('show');
+  document.getElementById('finishScreen').classList.remove('show');
+  document.getElementById('pageTitle').textContent='📖 '+b.title;
+  buildDots();renderPage();
+}
+
+function showList(){
+  curBook=null;synth.cancel();
+  document.getElementById('bookList').style.display='flex';
+  document.getElementById('bookList').style.flexDirection='column';
+  document.getElementById('reader').classList.remove('show');
+  document.getElementById('wordCardPage').classList.remove('show');
+  document.getElementById('finishScreen').classList.remove('show');
+  document.getElementById('pageTitle').textContent='📖 Mini Books';
+}
+
+// ═══════════════════════════════════
+// RENDER
+// ═══════════════════════════════════
+function buildDots(){
+  const el=document.getElementById('pageDots');
+  el.innerHTML='';
+  const total=curBook.pages.length*2+1;
+  for(let i=0;i<total;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===0?' active':'');
+    el.appendChild(d);
+  }
+}
+
+function updateDots(idx){
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+function renderPage(){
+  isWC=false;
+  document.getElementById('reader').classList.add('show');
+  document.getElementById('wordCardPage').classList.remove('show');
+  const page=curBook.pages[curPage];
+  const total=curBook.pages.length;
+
+  const dotIdx=isSecondRead ? total+1+curPage : curPage;
+  updateDots(dotIdx);
+
+  const readLabel=isSecondRead?'다시읽기':'읽기';
+  document.getElementById('pageNum').textContent=`${readLabel} ${curPage+1} / ${total}`;
+
+  // 장면 이모지
+  document.getElementById('pageScene').textContent=page.bg;
+
+  // 문장
+  document.getElementById('pageSentence').innerHTML=renderTokens(page.tokens, isSecondRead);
+
+  // 다시읽기 배너
+  document.getElementById('readModeBanner').classList.toggle('show', isSecondRead);
+
+  // 카드 애니메이션
+  const card=document.getElementById('pageCard');
+  card.style.animation='none';card.offsetHeight;
+  card.style.animation='pageSlide 0.35s cubic-bezier(.25,.46,.45,.94)';
+
+  // 네비게이션
+  document.getElementById('prevBtn').disabled=curPage===0 && !isSecondRead;
+  const isLast=curPage===total-1;
+  document.getElementById('nextBtn').textContent=
+    isSecondRead&&isLast?'🏆' : !isSecondRead&&isLast?'📚' : '→';
+
+  setTimeout(()=>speakPage(),500);
+}
+
+function speakPage(){
+  if(isWC)return;
+  const page=curBook.pages[curPage];
+  const btn=document.getElementById('speakBtn');
+  synth.cancel();btn.classList.add('playing');
+  const u=new SpeechSynthesisUtterance(page.speak);
+  u.rate=0.75;u.pitch=1.0;
+  const v=getVoice();if(v)u.voice=v;
+  u.onend=()=>btn.classList.remove('playing');
+  synth.speak(u);
+}
+
+// ═══════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════
+function prevPage(){
+  if(isWC){backFromWC();return;}
+  if(curPage>0){curPage--;renderPage();}
+  else if(isSecondRead){isSecondRead=false;showWordCards();}
+}
+function nextPage(){
+  const total=curBook.pages.length;
+  if(isWC){startSecondRead();return;}
+  if(curPage<total-1){curPage++;renderPage();}
+  else if(!isSecondRead){showWordCards();}
+  else{showFinish();}
+}
+
+// ═══════════════════════════════════
+// WORD CARDS
+// ═══════════════════════════════════
+function showWordCards(){
+  isWC=true;synth.cancel();
+  document.getElementById('reader').classList.remove('show');
+  document.getElementById('wordCardPage').classList.add('show');
+  updateDots(curBook.pages.length);
+  const grid=document.getElementById('wcGrid');
+  grid.innerHTML='';
+  curBook.wordCards.forEach(wc=>{
+    const item=document.createElement('div');
+    item.className='wc-item';
+    item.innerHTML=`
+      <span class="wc-emoji">${wc.emoji}</span>
+      <div class="wc-word">${wc.word}</div>
+      <div class="wc-kr">${wc.kr}</div>
+      <div class="wc-bars">
+        <div class="wc-bar"></div><div class="wc-bar"></div>
+        <div class="wc-bar"></div><div class="wc-bar"></div>
+        <div class="wc-bar"></div>
+      </div>`;
+    item.onclick=()=>{
+      synth.cancel();
+      document.querySelectorAll('.wc-item').forEach(i=>i.classList.remove('playing'));
+      item.classList.add('playing');
+      const u=new SpeechSynthesisUtterance(wc.word);
+      u.rate=0.8;const v=getVoice();if(v)u.voice=v;
+      u.onend=()=>item.classList.remove('playing');
+      synth.speak(u);
+    };
+    grid.appendChild(item);
+  });
+}
+
+function startSecondRead(){
+  isWC=false;isSecondRead=true;curPage=0;
+  document.getElementById('wordCardPage').classList.remove('show');
+  document.getElementById('reader').classList.add('show');
+  renderPage();
+}
+function backFromWC(){
+  isWC=false;isSecondRead=false;
+  curPage=curBook.pages.length-1;
+  renderPage();
+}
+
+// ═══════════════════════════════════
+// FINISH
+// ═══════════════════════════════════
+function showFinish(){
+  synth.cancel();
+  document.getElementById('reader').classList.remove('show');
+  document.getElementById('finishScreen').classList.add('show');
+  document.getElementById('finishMsg').textContent=
+    `"${curBook.title}"을 다 읽었어요! 대단해요! 🌟`;
+  setTimeout(()=>{
+    const u=new SpeechSynthesisUtterance('Excellent! You are a Phonics Hero!');
+    u.rate=0.8;const v=getVoice();if(v)u.voice=v;synth.speak(u);
+  },500);
+}
+function readAgain(){
+  document.getElementById('finishScreen').classList.remove('show');
+  curPage=0;isWC=false;isSecondRead=false;
+  document.getElementById('reader').classList.add('show');
+  buildDots();renderPage();
+}
+
+renderBookList();
+</script>
+</body>
+</html>
+<style>
+:root {
+  --red:#FF4B5C; --blue:#2D7DD2; --green:#06D6A0;
+  --yellow:#FFD166; --purple:#9B5DE5; --orange:#FF8C42;
+  --dark:#1A1A2E; --bg:#0F0F23; --card:#1E1E3A; --card2:#252545;
+  --text:#F0F0FF; --muted:#8888AA;
+  --radius:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);min-height:100vh;color:var(--text);
+  overflow-x:hidden;
+}
+.star-bg{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse at 20% 20%,rgba(155,93,229,0.15) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 80%,rgba(45,125,210,0.15) 0%,transparent 50%),
+    var(--bg);
+}
+.wrap{
+  position:relative;z-index:1;
+  max-width:520px;margin:0 auto;
+  padding:0 16px 80px;
+  display:flex;flex-direction:column;align-items:center;
+}
+
+/* TOP BAR */
+.topbar{
+  width:100%;display:flex;align-items:center;gap:12px;
+  padding:16px 0 20px;
+}
+.back-btn{
+  width:42px;height:42px;border-radius:13px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  color:var(--text);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0;
+}
+.back-btn:hover{background:rgba(255,255,255,0.15);}
+.page-title{
+  font-family:'Bangers',cursive;font-size:1.6rem;
+  letter-spacing:2px;color:var(--text);flex:1;
+  text-shadow:0 0 20px rgba(155,93,229,0.5);
+}
+
+/* BOOK LIST */
+.book-list{width:100%;display:flex;flex-direction:column;gap:14px;}
+.book-card{
+  background:var(--card);border:1px solid rgba(255,255,255,0.07);
+  border-radius:22px;padding:18px;
+  display:flex;align-items:center;gap:16px;
+  cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;
+}
+.book-card:not(.locked):hover{
+  transform:translateY(-4px);
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  border-color:rgba(255,255,255,0.15);
+}
+.book-card.locked{opacity:0.4;pointer-events:none;filter:grayscale(0.7);}
+.book-cover{
+  width:68px;height:88px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;flex-shrink:0;position:relative;
+}
+.book-cover::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;
+  width:7px;background:rgba(0,0,0,0.3);border-radius:0 12px 12px 0;
+}
+.book-info{flex:1;}
+.book-level{font-size:0.68rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.book-title{font-family:'Bangers',cursive;font-size:1.25rem;letter-spacing:1px;color:var(--text);margin-bottom:4px;}
+.book-desc{font-size:0.78rem;font-weight:600;color:var(--muted);}
+.book-arrow{font-size:1.5rem;color:var(--muted);flex-shrink:0;}
+
+/* READER */
+.reader{display:none;width:100%;flex-direction:column;align-items:center;gap:16px;}
+.reader.show{display:flex;}
+
+/* PAGE CARD */
+.page-card{
+  width:100%;background:var(--card);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:28px;padding:28px 24px 32px;
+  text-align:center;min-height:380px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:20px;
+  position:relative;overflow:hidden;
+  animation:pageSlide 0.35s cubic-bezier(.25,.46,.45,.94);
+}
+@keyframes pageSlide{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+.page-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(155,93,229,0.07) 0%,transparent 70%);
+}
+.page-num{
+  position:absolute;top:16px;right:20px;
+  font-size:0.72rem;font-weight:800;color:var(--muted);letter-spacing:1px;
+}
+
+/* HERO SCENE */
+.hero-scene{
+  display:flex;align-items:flex-end;justify-content:center;
+  gap:12px;min-height:150px;position:relative;z-index:1;
+  animation:heroFloat 3s ease-in-out infinite alternate;
+}
+@keyframes heroFloat{from{transform:translateY(0);}to{transform:translateY(-8px);}}
+
+/* SENTENCE */
+.page-sentence{
+  font-family:'Baloo 2',cursive;
+  font-size:clamp(1.2rem,4.5vw,1.6rem);
+  font-weight:800;color:var(--text);
+  line-height:1.8;position:relative;z-index:1;
+  max-width:400px;display:flex;flex-wrap:wrap;
+  align-items:center;justify-content:center;gap:4px 6px;
+}
+
+/* phonics letter boxes */
+.phword{display:inline-flex;gap:2px;align-items:center;vertical-align:middle;}
+.pl{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:27px;height:31px;border-radius:7px;
+  font-family:'Baloo 2',cursive;font-size:0.95rem;font-weight:700;color:white;
+}
+.pl.c{background:#4A4E69;}
+.pl.va{background:var(--red);}
+.pl.ve{background:var(--blue);}
+.pl.vi{background:var(--green);}
+.pl.vo{background:var(--yellow);color:var(--dark);}
+.pl.vu{background:var(--purple);}
+
+/* sight word hint */
+.sw-hint{
+  display:inline-flex;flex-direction:column;
+  align-items:center;gap:1px;position:relative;
+}
+.sw-emoji{font-size:1rem;line-height:1;}
+.sw-word{
+  font-family:'Baloo 2',cursive;
+  font-size:clamp(1.2rem,4.5vw,1.6rem);font-weight:800;
+  color:var(--yellow);
+  border-bottom:2px dashed rgba(255,209,102,0.4);
+  line-height:1;
+}
+
+/* plain word */
+.plain-word{
+  font-family:'Baloo 2',cursive;
+  font-size:clamp(1.2rem,4.5vw,1.6rem);font-weight:800;
+  color:var(--text);line-height:1;
+}
+
+/* CONTROLS */
+.reader-controls{
+  display:flex;gap:10px;align-items:center;width:100%;
+}
+.rd-btn{
+  width:52px;height:52px;border-radius:14px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.05);
+  color:var(--text);font-size:1.3rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0;
+}
+.rd-btn:hover{background:rgba(255,255,255,0.12);}
+.rd-btn:disabled{opacity:0.2;pointer-events:none;}
+.rd-speak{
+  flex:1;height:52px;
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+  border:none;border-radius:14px;color:white;
+  font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:800;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all 0.2s;box-shadow:0 6px 24px rgba(155,93,229,0.4);
+}
+.rd-speak:hover{transform:translateY(-2px);}
+.rd-speak.playing{animation:spkPulse 0.6s infinite alternate;}
+@keyframes spkPulse{from{box-shadow:0 6px 24px rgba(155,93,229,0.4);}to{box-shadow:0 6px 40px rgba(155,93,229,0.8);}}
+
+.page-dots{display:flex;gap:6px;justify-content:center;}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all 0.3s;}
+.dot.active{background:var(--purple);width:22px;border-radius:4px;}
+
+.rd-close{
+  width:100%;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:12px;
+  font-family:'Nunito',sans-serif;font-size:0.85rem;font-weight:800;
+  color:var(--muted);cursor:pointer;transition:all 0.2s;
+}
+.rd-close:hover{border-color:var(--red);color:var(--red);}
+
+/* WORD CARD PAGE */
+.wordcard-page{
+  width:100%;background:var(--card);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:28px;padding:28px 20px;
+  display:none;flex-direction:column;align-items:center;gap:20px;
+  animation:pageSlide 0.35s ease;
+}
+.wordcard-page.show{display:flex;}
+.wc-title{
+  font-family:'Bangers',cursive;font-size:1.4rem;
+  letter-spacing:2px;color:var(--yellow);
+  text-shadow:0 0 20px rgba(255,209,102,0.4);
+}
+.wc-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));
+  gap:10px;width:100%;
+}
+.wc-item{
+  background:var(--card2);border-radius:16px;padding:14px 8px;
+  text-align:center;cursor:pointer;transition:all 0.2s;
+  border:1px solid rgba(255,255,255,0.06);
+}
+.wc-item:hover{transform:translateY(-3px);background:rgba(155,93,229,0.15);border-color:rgba(155,93,229,0.4);}
+.wc-item.playing{background:rgba(155,93,229,0.2);border-color:var(--purple);}
+.wc-emoji{font-size:1.8rem;display:block;margin-bottom:5px;}
+.wc-word{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:var(--yellow);margin-bottom:2px;}
+.wc-kr{font-size:0.7rem;font-weight:700;color:var(--muted);}
+.wc-bars{display:flex;align-items:center;justify-content:center;gap:2px;height:12px;margin-top:4px;}
+.wc-bar{width:2px;border-radius:1px;background:var(--purple);height:4px;}
+.wc-item.playing .wc-bar{animation:wcwave 0.5s ease-in-out infinite alternate;}
+.wc-bar:nth-child(1){animation-delay:0s;}
+.wc-bar:nth-child(2){height:8px;animation-delay:0.1s;}
+.wc-bar:nth-child(3){height:12px;animation-delay:0.2s;}
+.wc-bar:nth-child(4){height:8px;animation-delay:0.1s;}
+.wc-bar:nth-child(5){animation-delay:0s;}
+@keyframes wcwave{from{transform:scaleY(0.3);}to{transform:scaleY(1);}}
+
+/* FINISH */
+.finish-screen{
+  width:100%;background:var(--card);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:28px;padding:48px 24px;
+  text-align:center;display:none;
+  flex-direction:column;align-items:center;gap:16px;
+  animation:pageSlide 0.4s ease;
+}
+.finish-screen.show{display:flex;}
+.finish-stars{font-size:3.5rem;}
+.finish-hero-title{
+  font-family:'Bangers',cursive;font-size:2.5rem;letter-spacing:4px;
+  background:linear-gradient(135deg,var(--yellow),var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.finish-msg{font-size:0.9rem;font-weight:600;color:var(--muted);}
+.finish-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.f-btn{
+  border-radius:14px;padding:14px 24px;
+  font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:800;
+  cursor:pointer;transition:all 0.2s;border:none;
+}
+.f-btn.primary{background:linear-gradient(135deg,var(--purple),var(--blue));color:white;box-shadow:0 6px 20px rgba(155,93,229,0.4);}
+.f-btn.secondary{background:rgba(255,255,255,0.07);color:var(--text);border:1px solid rgba(255,255,255,0.12);}
+.f-btn:hover{transform:translateY(-2px);}
+</style>
+</head>
+<body>
+<div class="star-bg"></div>
+<div class="wrap">
+
+  <div class="topbar">
+    <button class="back-btn" onclick="showList()">←</button>
+    <div class="page-title" id="pageTitle">📖 MINI BOOKS</div>
+  </div>
+
+  <div class="book-list" id="bookList"></div>
+
+  <div class="reader" id="reader">
+    <div class="page-card" id="pageCard">
+      <div class="page-num" id="pageNum">1 / 7</div>
+      <!-- 다시읽기 배너 -->
+      <div id="readModeBanner" style="display:none;
+        position:absolute;top:14px;left:16px;
+        background:rgba(255,209,102,0.15);
+        border:1px solid rgba(255,209,102,0.3);
+        border-radius:50px;padding:4px 12px;
+        font-size:0.7rem;font-weight:800;
+        color:var(--yellow);letter-spacing:1px;
+        align-items:center;gap:4px;">
+        📖 다시읽기
+      </div>
+      <div class="hero-scene" id="heroScene"></div>
+      <div class="page-sentence" id="pageSentence"></div>
+    </div>
+    <div class="page-dots" id="pageDots"></div>
+    <div class="reader-controls">
+      <button class="rd-btn" id="prevBtn" onclick="prevPage()">←</button>
+      <button class="rd-speak" id="speakBtn" onclick="speakPage()">🔊 읽어주기</button>
+      <button class="rd-btn" id="nextBtn" onclick="nextPage()">→</button>
+    </div>
+    <button class="rd-close" onclick="showList()">📚 책 목록으로</button>
+  </div>
+
+  <div class="wordcard-page" id="wordCardPage">
+    <div class="wc-title">⭐ NEW WORDS</div>
+    <div class="wc-grid" id="wcGrid"></div>
+    <div style="font-size:0.8rem;font-weight:700;color:var(--muted);text-align:center;padding:4px 0;">
+      탭하면 소리를 들을 수 있어요 🔊
+    </div>
+    <div class="reader-controls">
+      <button class="rd-btn" onclick="backFromWC()">←</button>
+      <button class="rd-speak" onclick="startSecondRead()">
+        📖 다시 읽기
+      </button>
+    </div>
+  </div>
+
+  <div class="finish-screen" id="finishScreen">
+    <div class="finish-stars">⭐⭐⭐</div>
+    <div class="finish-hero-title">PHONICS HERO!</div>
+    <div class="finish-msg" id="finishMsg"></div>
+    <div class="finish-btns">
+      <button class="f-btn primary" onclick="readAgain()">다시 읽기 🔄</button>
+      <button class="f-btn secondary" onclick="showList()">다른 책 📚</button>
+    </div>
+  </div>
+
+</div>
+<script>
+// ═══════════════════════════════════════
+// SVG HERO GENERATORS
+// ═══════════════════════════════════════
+function shade(hex,p){
+  const n=parseInt(hex.replace('#',''),16);
+  const r=Math.min(255,Math.max(0,((n>>16)&255)+p));
+  const g=Math.min(255,Math.max(0,((n>>8)&255)+p));
+  const b=Math.min(255,Math.max(0,(n&255)+p));
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+function drawHero(letter, color, w=110){
+  const tc = color==='#FFD166'?'#1A1A2E':'white';
+  const cape = shade(color,-30);
+  const head = shade(color,20);
+  return `<svg width="${w}" height="${Math.round(w*1.35)}" viewBox="0 0 110 149" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cape back -->
+  <ellipse cx="55" cy="95" rx="33" ry="42" fill="${cape}" opacity="0.9"/>
+  <!-- Cape sides -->
+  <path d="M33 80 Q18 110 24 135" stroke="${cape}" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <path d="M77 80 Q92 110 86 135" stroke="${cape}" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <!-- Body -->
+  <rect x="32" y="68" width="46" height="48" rx="16" fill="${color}"/>
+  <!-- Letter badge -->
+  <rect x="40" y="78" width="30" height="28" rx="8" fill="rgba(0,0,0,0.18)"/>
+  <text x="55" y="96" text-anchor="middle" dominant-baseline="middle"
+    font-family="Bangers,cursive" font-size="20" fill="${tc}" letter-spacing="0">${letter}</text>
+  <!-- Neck -->
+  <rect x="48" y="58" width="14" height="14" rx="4" fill="${head}"/>
+  <!-- Head -->
+  <circle cx="55" cy="44" r="22" fill="${head}"/>
+  <!-- Mask -->
+  <path d="M36 42 Q55 34 74 42 Q64 50 55 46 Q46 50 36 42Z" fill="${cape}" opacity="0.75"/>
+  <!-- Eyes -->
+  <circle cx="47" cy="40" r="4" fill="white"/>
+  <circle cx="63" cy="40" r="4" fill="white"/>
+  <circle cx="48" cy="41" r="2" fill="#111"/>
+  <circle cx="64" cy="41" r="2" fill="#111"/>
+  <!-- Eyebrows -->
+  <path d="M44 35 Q47 32 51 35" stroke="${cape}" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M59 35 Q63 32 66 35" stroke="${cape}" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Smile -->
+  <path d="M47 52 Q55 59 63 52" stroke="${tc==='white'?cape:'white'}" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <!-- Arms -->
+  <circle cx="26" cy="82" r="9" fill="${color}"/>
+  <circle cx="84" cy="82" r="9" fill="${color}"/>
+  <!-- Fists -->
+  <circle cx="20" cy="91" r="7" fill="${shade(color,-10)}"/>
+  <circle cx="90" cy="91" r="7" fill="${shade(color,-10)}"/>
+  <!-- Legs -->
+  <rect x="37" y="112" width="14" height="28" rx="7" fill="${shade(color,-20)}"/>
+  <rect x="59" y="112" width="14" height="28" rx="7" fill="${shade(color,-20)}"/>
+  <!-- Sparkles -->
+  <text x="10" y="30" font-size="12" opacity="0.5" fill="white">✦</text>
+  <text x="88" y="22" font-size="9" opacity="0.4" fill="white">✦</text>
+  <text x="5" y="75" font-size="7" opacity="0.3" fill="white">✦</text>
+</svg>`;
+}
+
+function drawCitizen(letter, w=80){
+  return `<svg width="${w}" height="${Math.round(w*1.2)}" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body -->
+  <rect x="20" y="48" width="40" height="38" rx="12" fill="#4A4E69"/>
+  <!-- Letter -->
+  <rect x="27" y="56" width="26" height="22" rx="6" fill="rgba(0,0,0,0.2)"/>
+  <text x="40" y="70" text-anchor="middle" dominant-baseline="middle"
+    font-family="Bangers,cursive" font-size="16" fill="white">${letter}</text>
+  <!-- Head -->
+  <circle cx="40" cy="32" r="18" fill="#6A6E89"/>
+  <!-- Eyes -->
+  <circle cx="34" cy="30" r="3" fill="white"/>
+  <circle cx="46" cy="30" r="3" fill="white"/>
+  <circle cx="34.8" cy="31" r="1.5" fill="#1A1A2E"/>
+  <circle cx="46.8" cy="31" r="1.5" fill="#1A1A2E"/>
+  <!-- Smile -->
+  <path d="M34 40 Q40 45 46 40" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Arms -->
+  <circle cx="13" cy="58" r="7" fill="#4A4E69"/>
+  <circle cx="67" cy="58" r="7" fill="#4A4E69"/>
+  <!-- Legs -->
+  <rect x="24" y="82" width="11" height="12" rx="5" fill="#3A3E59"/>
+  <rect x="45" y="82" width="11" height="12" rx="5" fill="#3A3E59"/>
+</svg>`;
+}
+
+const HEROES={
+  a:{color:'#FF4B5C',name:'Aida'},
+  e:{color:'#2D7DD2',name:'Echo'},
+  i:{color:'#06D6A0',name:'Iggy'},
+  o:{color:'#FFD166',name:'Obi'},
+  u:{color:'#9B5DE5',name:'Una'},
+};
+
+// ═══════════════════════════════════════
+// TOKEN RENDERER
+// ═══════════════════════════════════════
+function renderTokens(tokens, showHints){
+  return tokens.map(t=>{
+    if(t.type==='ph'){
+      const letters=t.word.split('').map(l=>{
+        const cls=l===t.vowel?'v'+t.vowel:'c';
+        return `<span class="pl ${cls}">${l}</span>`;
+      }).join('');
+      return `<span class="phword">${letters}</span>`;
+    } else {
+      // 다시읽기 모드일 때만 사이트워드 살짝 강조
+      const isSW = t.type==='sw';
+      if(isSW && showHints){
+        return `<span class="sw-word">${t.word}</span>`;
+      }
+      return `<span class="plain-word">${t.word}</span>`;
+    }
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// BOOKS DATA
+// ═══════════════════════════════════════
+const BOOKS=[
+{id:1,level:'Level 1',locked:false,title:'Sam and the Cat',
+ desc:'단모음 a · 사이트워드: this, is, the, a, my',
+ vowel:'a',cover:'🐱',
+ pages:[
+  {hero:{v:'a'},bg:'🌟',speak:'This is Sam.',
+   tokens:[{type:'sw',word:'This',emoji:'👆'},{type:'sw',word:'is',emoji:'➡️'},{type:'sw',word:'Sam',emoji:'👦'},{type:'plain',word:'.'}]},
+  {hero:{v:'a'},bg:'🐱',speak:'Sam has a cat.',
+   tokens:[{type:'sw',word:'Sam',emoji:'👦'},{type:'sw',word:'has',emoji:'🤝'},{type:'sw',word:'a',emoji:'1️⃣'},{type:'ph',word:'cat',vowel:'a'},{type:'plain',word:'.'}]},
+  {hero:{c:'c'},bg:'😺',speak:'The cat is fat.',
+   tokens:[{type:'sw',word:'The',emoji:'☝️'},{type:'ph',word:'cat',vowel:'a'},{type:'sw',word:'is',emoji:'➡️'},{type:'ph',word:'fat',vowel:'a'},{type:'plain',word:'.'}]},
+  {hero:{c:'c'},bg:'🛋️',speak:'The fat cat sat.',
+   tokens:[{type:'sw',word:'The',emoji:'☝️'},{type:'ph',word:'fat',vowel:'a'},{type:'ph',word:'cat',vowel:'a'},{type:'ph',word:'sat',vowel:'a'},{type:'plain',word:'.'}]},
+  {hero:{v:'a'},bg:'😄',speak:'"My cat!" said Sam.',
+   tokens:[{type:'plain',word:'"'},{type:'sw',word:'My',emoji:'👆'},{type:'ph',word:'cat',vowel:'a'},{type:'plain',word:'!"'},{type:'sw',word:'said',emoji:'💬'},{type:'sw',word:'Sam',emoji:'👦'},{type:'plain',word:'.'}]},
+  {hero:{v:'a'},bg:'😴',speak:'Sam and the cat nap.',
+   tokens:[{type:'sw',word:'Sam',emoji:'👦'},{type:'sw',word:'and',emoji:'➕'},{type:'sw',word:'the',emoji:'☝️'},{type:'ph',word:'cat',vowel:'a'},{type:'sw',word:'nap',emoji:'😴'},{type:'plain',word:'.'}]},
+ ],
+ wordCards:[{word:'Sam',emoji:'👦',kr:'샘(이름)'},{word:'has',emoji:'🤝',kr:'가지다'},{word:'My',emoji:'👆',kr:'나의'},{word:'said',emoji:'💬',kr:'말했다'},{word:'nap',emoji:'😴',kr:'낮잠 자다'}]
+},
+{id:2,level:'Level 1',locked:false,title:'Ed and the Red Hen',
+ desc:'단모음 e · 사이트워드: see, like, look, are',
+ vowel:'e',cover:'🐔',
+ pages:[
+  {hero:{v:'e'},bg:'🌟',speak:'This is Ed.',
+   tokens:[{type:'sw',word:'This',emoji:'👆'},{type:'sw',word:'is',emoji:'➡️'},{type:'sw',word:'Ed',emoji:'👦'},{type:'plain',word:'.'}]},
+  {hero:{v:'e'},bg:'👀',speak:'Ed can see a hen.',
+   tokens:[{type:'sw',word:'Ed',emoji:'👦'},{type:'sw',word:'can',emoji:'💪'},{type:'sw',word:'see',emoji:'👀'},{type:'sw',word:'a',emoji:'1️⃣'},{type:'ph',word:'hen',vowel:'e'},{type:'plain',word:'.'}]},
+  {hero:{c:'h'},bg:'🔴',speak:'The hen is red.',
+   tokens:[{type:'sw',word:'The',emoji:'☝️'},{type:'ph',word:'hen',vowel:'e'},{type:'sw',word:'is',emoji:'➡️'},{type:'ph',word:'red',vowel:'e'},{type:'plain',word:'.'}]},
+  {hero:{v:'e'},bg:'❤️',speak:'"I like the red hen!" said Ed.',
+   tokens:[{type:'plain',word:'"I'},{type:'sw',word:'like',emoji:'❤️'},{type:'sw',word:'the',emoji:'☝️'},{type:'ph',word:'red',vowel:'e'},{type:'ph',word:'hen',vowel:'e'},{type:'plain',word:'!"'},{type:'sw',word:'said',emoji:'💬'},{type:'sw',word:'Ed',emoji:'👦'},{type:'plain',word:'.'}]},
+  {hero:{c:'h'},bg:'🥚',speak:'Look! The hen has ten eggs.',
+   tokens:[{type:'sw',word:'Look',emoji:'👀'},{type:'plain',word:'!'},{type:'sw',word:'The',emoji:'☝️'},{type:'ph',word:'hen',vowel:'e'},{type:'sw',word:'has',emoji:'🤝'},{type:'sw',word:'ten',emoji:'🔟'},{type:'sw',word:'eggs',emoji:'🥚'},{type:'plain',word:'.'}]},
+  {hero:{v:'e'},bg:'😊',speak:'Ed and the hen are happy.',
+   tokens:[{type:'sw',word:'Ed',emoji:'👦'},{type:'sw',word:'and',emoji:'➕'},{type:'sw',word:'the',emoji:'☝️'},{type:'ph',word:'hen',vowel:'e'},{type:'sw',word:'are',emoji:'➡️'},{type:'sw',word:'happy',emoji:'😊'},{type:'plain',word:'.'}]},
+ ],
+ wordCards:[{word:'Ed',emoji:'👦',kr:'에드(이름)'},{word:'like',emoji:'❤️',kr:'좋아하다'},{word:'Look',emoji:'👀',kr:'봐!'},{word:'eggs',emoji:'🥚',kr:'달걀'},{word:'happy',emoji:'😊',kr:'행복한'}]
+},
+{id:3,level:'Level 1',locked:false,title:'Big Pip',
+ desc:'단모음 i · 사이트워드: he, she, we, can',
+ vowel:'i',cover:'🐷',
+ pages:[
+  {hero:{v:'i'},bg:'🌟',speak:'This is Pip.',tokens:[{type:'sw',word:'This',emoji:'👆'},{type:'sw',word:'is',emoji:'➡️'},{type:'sw',word:'Pip',emoji:'👧'},{type:'plain',word:'.'}]},
+  {hero:{v:'i'},bg:'🏔️',speak:'Pip is big.',tokens:[{type:'sw',word:'Pip',emoji:'👧'},{type:'sw',word:'is',emoji:'➡️'},{type:'ph',word:'big',vowel:'i'},{type:'plain',word:'.'}]},
+  {hero:{c:'d'},bg:'⛏️',speak:'He can dig.',tokens:[{type:'sw',word:'He',emoji:'👦'},{type:'sw',word:'can',emoji:'💪'},{type:'ph',word:'dig',vowel:'i'},{type:'plain',word:'.'}]},
+  {hero:{v:'i'},bg:'🪑',speak:'She can sit and dig.',tokens:[{type:'sw',word:'She',emoji:'👧'},{type:'sw',word:'can',emoji:'💪'},{type:'ph',word:'sit',vowel:'i'},{type:'sw',word:'and',emoji:'➕'},{type:'ph',word:'dig',vowel:'i'},{type:'plain',word:'.'}]},
+  {hero:{v:'i'},bg:'🤝',speak:'We can dig!',tokens:[{type:'sw',word:'We',emoji:'👫'},{type:'sw',word:'can',emoji:'💪'},{type:'ph',word:'dig',vowel:'i'},{type:'plain',word:'!'}]},
+  {hero:{v:'i'},bg:'🏆',speak:'Pip did it!',tokens:[{type:'sw',word:'Pip',emoji:'👧'},{type:'sw',word:'did',emoji:'✅'},{type:'sw',word:'it',emoji:'☝️'},{type:'plain',word:'!'}]},
+ ],
+ wordCards:[{word:'Pip',emoji:'👧',kr:'핍(이름)'},{word:'dig',emoji:'⛏️',kr:'파다'},{word:'sit',emoji:'🪑',kr:'앉다'},{word:'did',emoji:'✅',kr:'했다'}]
+},
+{id:4,level:'Level 1',locked:false,title:'Don and the Hot Dog',
+ desc:'단모음 o · 사이트워드: one, two, can, not',
+ vowel:'o',cover:'🐶',
+ pages:[
+  {hero:{v:'o'},bg:'🌟',speak:'This is Don.',tokens:[{type:'sw',word:'This',emoji:'👆'},{type:'sw',word:'is',emoji:'➡️'},{type:'sw',word:'Don',emoji:'👦'},{type:'plain',word:'.'}]},
+  {hero:{v:'o'},bg:'🐶',speak:'Don has one dog.',tokens:[{type:'sw',word:'Don',emoji:'👦'},{type:'sw',word:'has',emoji:'🤝'},{type:'sw',word:'one',emoji:'1️⃣'},{type:'ph',word:'dog',vowel:'o'},{type:'plain',word:'.'}]},
+  {hero:{c:'d'},bg:'🔥',speak:'The dog is hot.',tokens:[{type:'sw',word:'The',emoji:'☝️'},{type:'ph',word:'dog',vowel:'o'},{type:'sw',word:'is',emoji:'➡️'},{type:'ph',word:'hot',vowel:'o'},{type:'plain',word:'.'}]},
+  {hero:{v:'o'},bg:'🧹',speak:'Don can see two mops.',tokens:[{type:'sw',word:'Don',emoji:'👦'},{type:'sw',word:'can',emoji:'💪'},{type:'sw',word:'see',emoji:'👀'},{type:'sw',word:'two',emoji:'2️⃣'},{type:'ph',word:'mops',vowel:'o'},{type:'plain',word:'.'}]},
+  {hero:{c:'d'},bg:'😅',speak:'The dog is not hot now.',tokens:[{type:'sw',word:'The',emoji:'☝️'},{type:'ph',word:'dog',vowel:'o'},{type:'sw',word:'is',emoji:'➡️'},{type:'sw',word:'not',emoji:'❌'},{type:'ph',word:'hot',vowel:'o'},{type:'sw',word:'now',emoji:'⏰'},{type:'plain',word:'.'}]},
+  {hero:{v:'o'},bg:'🎉',speak:'Don and the dog hop!',tokens:[{type:'sw',word:'Don',emoji:'👦'},{type:'sw',word:'and',emoji:'➕'},{type:'sw',word:'the',emoji:'☝️'},{type:'ph',word:'dog',vowel:'o'},{type:'ph',word:'hop',vowel:'o'},{type:'plain',word:'!'}]},
+ ],
+ wordCards:[{word:'Don',emoji:'👦',kr:'돈(이름)'},{word:'one',emoji:'1️⃣',kr:'하나'},{word:'two',emoji:'2️⃣',kr:'둘'},{word:'not',emoji:'❌',kr:'아니다'},{word:'now',emoji:'⏰',kr:'지금'}]
+},
+{id:5,level:'Level 1',locked:false,title:'Bud Runs',
+ desc:'단모음 u · 사이트워드: can, not, up, and, but',
+ vowel:'u',cover:'🏃',
+ pages:[
+  {hero:{v:'u'},bg:'🌟',speak:'This is Bud.',tokens:[{type:'sw',word:'This',emoji:'👆'},{type:'sw',word:'is',emoji:'➡️'},{type:'sw',word:'Bud',emoji:'👦'},{type:'plain',word:'.'}]},
+  {hero:{v:'u'},bg:'🏃',speak:'Bud can run.',tokens:[{type:'sw',word:'Bud',emoji:'👦'},{type:'sw',word:'can',emoji:'💪'},{type:'ph',word:'run',vowel:'u'},{type:'plain',word:'.'}]},
+  {hero:{c:'b'},bg:'🙅',speak:'Bud is not big.',tokens:[{type:'sw',word:'Bud',emoji:'👦'},{type:'sw',word:'is',emoji:'➡️'},{type:'sw',word:'not',emoji:'❌'},{type:'ph',word:'big',vowel:'i'},{type:'plain',word:'.'}]},
+  {hero:{v:'u'},bg:'🦘',speak:'But Bud can jump up!',tokens:[{type:'sw',word:'But',emoji:'↔️'},{type:'sw',word:'Bud',emoji:'👦'},{type:'sw',word:'can',emoji:'💪'},{type:'sw',word:'jump',emoji:'🦘'},{type:'sw',word:'up',emoji:'⬆️'},{type:'plain',word:'!'}]},
+  {hero:{c:'n'},bg:'📣',speak:'"Go, Bud, go!" said Nan.',tokens:[{type:'plain',word:'"Go, Bud, go!"'},{type:'sw',word:'said',emoji:'💬'},{type:'sw',word:'Nan',emoji:'👧'},{type:'plain',word:'.'}]},
+  {hero:{v:'u'},bg:'🏆',speak:'Bud wins!',tokens:[{type:'sw',word:'Bud',emoji:'👦'},{type:'sw',word:'wins',emoji:'🏆'},{type:'plain',word:'!'}]},
+ ],
+ wordCards:[{word:'Bud',emoji:'👦',kr:'버드(이름)'},{word:'jump',emoji:'🦘',kr:'점프하다'},{word:'up',emoji:'⬆️',kr:'위로'},{word:'Nan',emoji:'👧',kr:'낸(이름)'},{word:'wins',emoji:'🏆',kr:'이기다'}]
+},
+{id:6,level:'Level 2',locked:true,title:'The Flag on the Sled',
+ desc:'자음군 fl, sl · 사이트워드 전체',vowel:'a',cover:'🚩',
+ pages:[
+  {hero:{v:'a'},bg:'🌟',speak:'This is Flo.',tokens:[{type:'sw',word:'This',emoji:'👆'},{type:'sw',word:'is',emoji:'➡️'},{type:'sw',word:'Flo',emoji:'👧'},{type:'plain',word:'.'}]},
+  {hero:{v:'a'},bg:'🛷',speak:'Flo has a sled.',tokens:[{type:'sw',word:'Flo',emoji:'👧'},{type:'sw',word:'has',emoji:'🤝'},{type:'sw',word:'a',emoji:'1️⃣'},{type:'ph',word:'sled',vowel:'e'},{type:'plain',word:'.'}]},
+  {hero:{v:'a'},bg:'🚩',speak:'She has a big flag.',tokens:[{type:'sw',word:'She',emoji:'👧'},{type:'sw',word:'has',emoji:'🤝'},{type:'sw',word:'a',emoji:'1️⃣'},{type:'ph',word:'flag',vowel:'a'},{type:'plain',word:'.'}]},
+  {hero:{c:'s'},bg:'💨',speak:'The sled can go fast!',tokens:[{type:'sw',word:'The',emoji:'☝️'},{type:'ph',word:'sled',vowel:'e'},{type:'sw',word:'can',emoji:'💪'},{type:'sw',word:'go',emoji:'🏃'},{type:'sw',word:'fast',emoji:'💨'},{type:'plain',word:'!'}]},
+  {hero:{v:'a'},bg:'🚩',speak:'The flag did not drop.',tokens:[{type:'sw',word:'The',emoji:'☝️'},{type:'ph',word:'flag',vowel:'a'},{type:'sw',word:'did',emoji:'✅'},{type:'sw',word:'not',emoji:'❌'},{type:'sw',word:'drop',emoji:'⬇️'},{type:'plain',word:'.'}]},
+  {hero:{v:'a'},bg:'🎉',speak:'Flo and the flag win!',tokens:[{type:'sw',word:'Flo',emoji:'👧'},{type:'sw',word:'and',emoji:'➕'},{type:'sw',word:'the',emoji:'☝️'},{type:'ph',word:'flag',vowel:'a'},{type:'sw',word:'win',emoji:'🏆'},{type:'plain',word:'!'}]},
+ ],
+ wordCards:[{word:'Flo',emoji:'👧',kr:'플로(이름)'},{word:'sled',emoji:'🛷',kr:'썰매'},{word:'fast',emoji:'💨',kr:'빠른'},{word:'drop',emoji:'⬇️',kr:'떨어지다'},{word:'win',emoji:'🏆',kr:'이기다'}]
+},
+{id:7,level:'Level 2',locked:true,title:'Gram the Frog',
+ desc:'자음군 fr, cr, dr · 사이트워드 전체',vowel:'o',cover:'🐸',
+ pages:[
+  {hero:{v:'o'},bg:'🌟',speak:'This is Gram.',tokens:[{type:'sw',word:'This',emoji:'👆'},{type:'sw',word:'is',emoji:'➡️'},{type:'sw',word:'Gram',emoji:'🐸'},{type:'plain',word:'.'}]},
+  {hero:{v:'o'},bg:'🐸',speak:'Gram is a frog.',tokens:[{type:'sw',word:'Gram',emoji:'🐸'},{type:'sw',word:'is',emoji:'➡️'},{type:'sw',word:'a',emoji:'1️⃣'},{type:'ph',word:'frog',vowel:'o'},{type:'plain',word:'.'}]},
+  {hero:{c:'c'},bg:'🦀',speak:'He can see a crab.',tokens:[{type:'sw',word:'He',emoji:'👦'},{type:'sw',word:'can',emoji:'💪'},{type:'sw',word:'see',emoji:'👀'},{type:'sw',word:'a',emoji:'1️⃣'},{type:'ph',word:'crab',vowel:'a'},{type:'plain',word:'.'}]},
+  {hero:{c:'c'},bg:'🥁',speak:'The crab can drum.',tokens:[{type:'sw',word:'The',emoji:'☝️'},{type:'ph',word:'crab',vowel:'a'},{type:'sw',word:'can',emoji:'💪'},{type:'ph',word:'drum',vowel:'u'},{type:'plain',word:'.'}]},
+  {hero:{v:'o'},bg:'👫',speak:'Gram and the crab are friends.',tokens:[{type:'sw',word:'Gram',emoji:'🐸'},{type:'sw',word:'and',emoji:'➕'},{type:'sw',word:'the',emoji:'☝️'},{type:'ph',word:'crab',vowel:'a'},{type:'sw',word:'are',emoji:'➡️'},{type:'sw',word:'friends',emoji:'👫'},{type:'plain',word:'.'}]},
+  {hero:{v:'o'},bg:'🎵',speak:'They play and play!',tokens:[{type:'sw',word:'They',emoji:'👥'},{type:'sw',word:'play',emoji:'🎮'},{type:'sw',word:'and',emoji:'➕'},{type:'sw',word:'play',emoji:'🎮'},{type:'plain',word:'!'}]},
+ ],
+ wordCards:[{word:'Gram',emoji:'🐸',kr:'그램(이름)'},{word:'crab',emoji:'🦀',kr:'게'},{word:'drum',emoji:'🥁',kr:'드럼 치다'},{word:'friends',emoji:'👫',kr:'친구들'},{word:'play',emoji:'🎮',kr:'놀다'}]
+},
+];
+
+// ═══════════════════════════════════════
+// STATE & AUDIO
+// ═══════════════════════════════════════
+let curBook=null, curPage=0, isWC=false, isSecondRead=false;
+const synth=window.speechSynthesis;
+function getVoice(){const v=synth.getVoices();return v.find(x=>x.lang.startsWith('en-US'))||v.find(x=>x.lang.startsWith('en-GB'))||v.find(x=>x.lang.startsWith('en'))||null;}
+if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=()=>{};
+
+// ═══════════════════════════════════════
+// BOOK LIST
+// ═══════════════════════════════════════
+function renderBookList(){
+  const list=document.getElementById('bookList');
+  list.innerHTML='';
+  BOOKS.forEach(b=>{
+    const h=HEROES[b.vowel];
+    const card=document.createElement('div');
+    card.className='book-card'+(b.locked?' locked':'');
+    card.innerHTML=`
+      <div class="book-cover" style="background:${h.color}22;border:1px solid ${h.color}44;">
+        ${b.cover}
+      </div>
+      <div class="book-info">
+        <div class="book-level">${b.level}${b.locked?' · 🔒':''}</div>
+        <div class="book-title">${b.title}</div>
+        <div class="book-desc">${b.desc}</div>
+      </div>
+      ${b.locked?'<span style="font-size:1.3rem">🔒</span>':'<div class="book-arrow">›</div>'}
+    `;
+    if(!b.locked)card.onclick=()=>openBook(b);
+    list.appendChild(card);
+  });
+}
+
+function openBook(b){
+  curBook=b; curPage=0; isWC=false; isSecondRead=false;
+  document.getElementById('bookList').style.display='none';
+  document.getElementById('reader').classList.add('show');
+  document.getElementById('wordCardPage').classList.remove('show');
+  document.getElementById('finishScreen').classList.remove('show');
+  document.getElementById('pageTitle').textContent='📖 '+b.title;
+  buildDots(); renderPage();
+}
+
+function showList(){
+  curBook=null;synth.cancel();
+  document.getElementById('bookList').style.display='flex';
+  document.getElementById('bookList').style.flexDirection='column';
+  document.getElementById('reader').classList.remove('show');
+  document.getElementById('wordCardPage').classList.remove('show');
+  document.getElementById('finishScreen').classList.remove('show');
+  document.getElementById('pageTitle').textContent='📖 MINI BOOKS';
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function buildDots(){
+  const el=document.getElementById('pageDots');
+  el.innerHTML='';
+  // 읽기(n) + 단어카드(1) + 다시읽기(n) = 2n+1
+  const total = curBook.pages.length*2 + 1;
+  for(let i=0;i<total;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i===0?' active':'');
+    el.appendChild(d);
+  }
+}
+
+function updateDots(idx){
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+function renderPage(){
+  isWC=false;
+  document.getElementById('reader').classList.add('show');
+  document.getElementById('wordCardPage').classList.remove('show');
+  const page=curBook.pages[curPage];
+  const total=curBook.pages.length;
+  // 도트 수 = 읽기6 + 단어카드1 + 다시읽기6 = 13개
+  // 두 번째 읽기는 7부터
+  const dotIdx = isSecondRead
+    ? curBook.pages.length + 1 + curPage
+    : curPage;
+  updateDots(dotIdx);
+
+  // 페이지 번호 표시
+  const readLabel = isSecondRead ? '다시읽기' : '읽기';
+  document.getElementById('pageNum').textContent=
+    `${readLabel} ${curPage+1} / ${total}`;
+
+  // 이모지 장면 (히어로 없이)
+  const scene=document.getElementById('heroScene');
+  scene.innerHTML=`<span style="font-size:5rem;animation:heroFloat 3s ease-in-out infinite alternate;display:inline-block;">${page.bg}</span>`;
+
+  // 문장 — 다시읽기 모드에서는 사이트워드 노란색 강조
+  document.getElementById('pageSentence').innerHTML=
+    renderTokens(page.tokens, isSecondRead);
+
+  // 두 번째 읽기 배너
+  const banner = document.getElementById('readModeBanner');
+  if(isSecondRead){
+    banner.style.display='flex';
+  } else {
+    banner.style.display='none';
+  }
+
+  // 애니메이션
+  const card=document.getElementById('pageCard');
+  card.style.animation='none'; card.offsetHeight;
+  card.style.animation='pageSlide 0.35s cubic-bezier(.25,.46,.45,.94)';
+
+  // 네비게이션
+  document.getElementById('prevBtn').disabled = curPage===0 && !isSecondRead;
+  const isLastPage = curPage===total-1;
+  if(isSecondRead && isLastPage){
+    document.getElementById('nextBtn').textContent='🏆';
+  } else if(!isSecondRead && isLastPage){
+    document.getElementById('nextBtn').textContent='📚';
+  } else {
+    document.getElementById('nextBtn').textContent='→';
+  }
+
+  setTimeout(()=>speakPage(), 500);
+}
+
+function speakPage(){
+  if(isWC)return;
+  const page=curBook.pages[curPage];
+  const btn=document.getElementById('speakBtn');
+  synth.cancel();btn.classList.add('playing');
+  const u=new SpeechSynthesisUtterance(page.speak);
+  u.rate=0.75;u.pitch=1.0;
+  const v=getVoice();if(v)u.voice=v;
+  u.onend=()=>btn.classList.remove('playing');
+  synth.speak(u);
+}
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function prevPage(){
+  if(isWC){ backFromWC(); return; }
+  if(curPage>0){
+    curPage--; renderPage();
+  } else if(isSecondRead){
+    // 다시읽기 첫 페이지 → 단어카드로
+    isSecondRead=false;
+    showWordCards();
+  }
+}
+
+function nextPage(){
+  const total=curBook.pages.length;
+  if(isWC){ startSecondRead(); return; }
+  if(curPage < total-1){
+    curPage++; renderPage();
+  } else if(!isSecondRead){
+    // 첫 읽기 끝 → 단어카드
+    showWordCards();
+  } else {
+    // 다시읽기 끝 → 완료
+    showFinish();
+  }
+}
+
+// ═══════════════════════════════════════
+// WORD CARDS
+// ═══════════════════════════════════════
+function showWordCards(){
+  isWC=true; synth.cancel();
+  document.getElementById('reader').classList.remove('show');
+  document.getElementById('wordCardPage').classList.add('show');
+  // 단어카드는 n번째 도트
+  updateDots(curBook.pages.length);
+  const grid=document.getElementById('wcGrid');
+  grid.innerHTML='';
+  curBook.wordCards.forEach(wc=>{
+    const item=document.createElement('div');
+    item.className='wc-item';
+    item.innerHTML=`
+      <span class="wc-emoji">${wc.emoji}</span>
+      <div class="wc-word">${wc.word}</div>
+      <div class="wc-kr">${wc.kr}</div>
+      <div class="wc-bars">
+        <div class="wc-bar"></div><div class="wc-bar"></div>
+        <div class="wc-bar"></div><div class="wc-bar"></div>
+        <div class="wc-bar"></div>
+      </div>`;
+    item.onclick=()=>{
+      synth.cancel();
+      document.querySelectorAll('.wc-item').forEach(i=>i.classList.remove('playing'));
+      item.classList.add('playing');
+      const u=new SpeechSynthesisUtterance(wc.word);
+      u.rate=0.8; const v=getVoice(); if(v)u.voice=v;
+      u.onend=()=>item.classList.remove('playing');
+      synth.speak(u);
+    };
+    grid.appendChild(item);
+  });
+}
+
+function startSecondRead(){
+  isWC=false; isSecondRead=true; curPage=0;
+  document.getElementById('wordCardPage').classList.remove('show');
+  document.getElementById('reader').classList.add('show');
+  renderPage();
+}
+
+function backFromWC(){
+  // 단어카드에서 뒤로 → 첫 읽기 마지막 페이지
+  isWC=false; isSecondRead=false;
+  curPage=curBook.pages.length-1;
+  renderPage();
+}
+
+// ═══════════════════════════════════════
+// FINISH
+// ═══════════════════════════════════════
+function showFinish(){
+  synth.cancel();
+  document.getElementById('wordCardPage').classList.remove('show');
+  document.getElementById('reader').classList.remove('show');
+  document.getElementById('finishScreen').classList.add('show');
+  document.getElementById('finishMsg').textContent=`"${curBook.title}"을 다 읽었어요! 파닉스 히어로! 🦸`;
+  setTimeout(()=>{
+    const u=new SpeechSynthesisUtterance('Excellent! You are a Phonics Hero!');
+    u.rate=0.8;const v=getVoice();if(v)u.voice=v;synth.speak(u);
+  },500);
+}
+function readAgain(){
+  document.getElementById('finishScreen').classList.remove('show');
+  curPage=0; isWC=false; isSecondRead=false;
+  document.getElementById('reader').classList.add('show');
+  buildDots(); renderPage();
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+renderBookList();
+</script>
+</body>
+</html>
